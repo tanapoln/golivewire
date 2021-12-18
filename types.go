@@ -6,24 +6,24 @@ type Renderer interface {
 
 type ComponentFactoryFunc func() interface{}
 
-type MessageRequest struct {
-	Fingerprint Fingerprint    `json:"fingerprint,omitempty"`
-	ServerMemo  ServerMemo     `json:"serverMemo,omitempty"`
-	Updates     []UpdateAction `json:"updates,omitempty"`
+type messageRequest struct {
+	Fingerprint fingerprint    `json:"fingerprint,omitempty"`
+	ServerMemo  serverMemo     `json:"serverMemo,omitempty"`
+	Updates     []updateAction `json:"updates,omitempty"`
 }
 
-type MessageResponse struct {
-	Effects    MessageEffects `json:"effects,omitempty"`
-	ServerMemo ServerMemo     `json:"serverMemo,omitempty"`
+type messageResponse struct {
+	Effects    messageEffects `json:"effects,omitempty"`
+	ServerMemo serverMemo     `json:"serverMemo,omitempty"`
 }
 
-type ComponentData struct {
-	Fingerprint Fingerprint      `json:"fingerprint,omitempty"`
-	Effects     ComponentEffects `json:"effects,omitempty"`
-	ServerMemo  ServerMemo       `json:"serverMemo,omitempty"`
+type componentData struct {
+	Fingerprint fingerprint      `json:"fingerprint,omitempty"`
+	Effects     componentEffects `json:"effects,omitempty"`
+	ServerMemo  serverMemo       `json:"serverMemo,omitempty"`
 }
 
-type Fingerprint struct {
+type fingerprint struct {
 	ID     string `json:"id,omitempty"`
 	Name   string `json:"name,omitempty"`
 	Locale string `json:"locale,omitempty"`
@@ -31,25 +31,25 @@ type Fingerprint struct {
 	Method string `json:"method,omitempty"`
 }
 
-type ServerMemo struct {
+type serverMemo struct {
 	Data interface{} `json:"data"`
 }
 
-type MessageEffects struct {
+type messageEffects struct {
 	Html  string   `json:"html"`
 	Dirty []string `json:"dirty"`
 }
 
-type ComponentEffects struct {
+type componentEffects struct {
 	Listeners []string `json:"listeners,omitempty"`
 }
 
-type UpdateAction struct {
+type updateAction struct {
 	Type    string              `json:"type,omitempty"`
-	Payload UpdateActionPayload `json:"payload,omitempty"`
+	Payload updateActionPayload `json:"payload,omitempty"`
 }
 
-type UpdateActionPayload struct {
+type updateActionPayload struct {
 	ID     string        `json:"id"`
 	Method string        `json:"method"`
 	Params []interface{} `json:"params"`

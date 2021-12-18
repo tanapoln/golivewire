@@ -27,20 +27,23 @@ var (
 )
 
 func init() {
-	rendererPipeline = append(rendererPipeline, &LivewireComponentIDRenderer{})
+	rendererPipeline = append(rendererPipeline, htmlDecoratorFunc(livewireIdRenderer))
 
 	initialRendererPipeline = append(initialRendererPipeline, rendererPipeline...)
-	initialRendererPipeline = append(initialRendererPipeline, &LivewireInitialDataRenderer{})
+	initialRendererPipeline = append(initialRendererPipeline, htmlDecoratorFunc(livewireInitialDataRenderer))
 }
 
 func AddDecorator(decorator HTMLDecorator) {
 	rendererPipeline = append(rendererPipeline, decorator)
 }
 
-type LivewireComponentIDRenderer struct {
+type htmlDecoratorFunc func(node *html.Node, component interface{}) error
+
+func (h htmlDecoratorFunc) Decorate(node *html.Node, component interface{}) error {
+	return h(node, component)
 }
 
-func (l *LivewireComponentIDRenderer) Decorate(node *html.Node, component interface{}) error {
+func livewireIdRenderer(node *html.Node, component interface{}) error {
 	var baseComp *BaseComponent
 	if v, ok := component.(baseComponentSupport); !ok {
 		return ErrNotComponent
@@ -56,10 +59,7 @@ func (l *LivewireComponentIDRenderer) Decorate(node *html.Node, component interf
 	return nil
 }
 
-type LivewireInitialDataRenderer struct {
-}
-
-func (l *LivewireInitialDataRenderer) Decorate(node *html.Node, component interface{}) error {
+func livewireInitialDataRenderer(node *html.Node, component interface{}) error {
 	var baseComp *BaseComponent
 	if v, ok := component.(baseComponentSupport); !ok {
 		return ErrNotComponent
@@ -67,15 +67,15 @@ func (l *LivewireInitialDataRenderer) Decorate(node *html.Node, component interf
 		baseComp = v.getBaseComponent()
 	}
 
-	initData := ComponentData{
-		Fingerprint: Fingerprint{
+	initData := componentData{
+		Fingerprint: fingerprint{
 			ID:   baseComp.GetID(),
 			Name: baseComp.Name,
 		},
-		Effects: ComponentEffects{
+		Effects: componentEffects{
 			Listeners: baseComp.Listeners,
 		},
-		ServerMemo: ServerMemo{
+		ServerMemo: serverMemo{
 			Data: component,
 		},
 	}

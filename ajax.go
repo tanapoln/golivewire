@@ -40,8 +40,8 @@ func NewAjaxHandler() http.Handler {
 			return
 		}
 
-		req := &MessageRequest{
-			ServerMemo: ServerMemo{
+		req := &messageRequest{
+			ServerMemo: serverMemo{
 				Data: comp,
 			},
 		}
@@ -87,12 +87,12 @@ func NewAjaxHandler() http.Handler {
 			return
 		}
 
-		resp := MessageResponse{
-			Effects: MessageEffects{
+		resp := messageResponse{
+			Effects: messageEffects{
 				Html:  html,
 				Dirty: []string{},
 			},
-			ServerMemo: ServerMemo{
+			ServerMemo: serverMemo{
 				Data: comp,
 			},
 		}
