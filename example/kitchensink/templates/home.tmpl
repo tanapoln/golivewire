@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Home</title>
+</head>
+<body>
+{{livewire "output"}}
+
+<script src="/static/livewire.js"></script>
+<script>
+  if (window.livewire) {
+    console.warn('Livewire: It looks like Livewire\'s @livewireScripts JavaScript assets have already been loaded. Make sure you aren\'t loading them twice.')
+  }
+
+  window.livewire = new Livewire();
+  window.livewire.devTools(true);
+  window.Livewire = window.livewire;
+  window.livewire_app_url = '';
+  window.livewire_token = 'OhwEoIWYC5WeZmaxVKV0IRNhSwGTPXC24KERstKg';
+
+  /* Make Alpine wait until Livewire is finished rendering to do its thing. */
+  window.deferLoadingAlpine = function (callback) {
+    window.addEventListener('livewire:load', function () {
+      callback();
+    });
+  };
+
+  let started = false;
+
+  window.addEventListener('alpine:initializing', function () {
+    if (!started) {
+      window.livewire.start();
+
+      started = true;
+    }
+  });
+
+  document.addEventListener("DOMContentLoaded", function () {
+    if (!started) {
+      window.livewire.start();
+
+      started = true;
+    }
+  });
+</script>
+</body>
+</html>
