@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"path"
 	"runtime"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/cors"
@@ -39,10 +41,24 @@ func main() {
 		c.HTML(200, "home.tmpl", nil)
 	})
 
+	srv.GET("/livewire-dusk/:class", func(c *gin.Context) {
+		className := c.Param("class")
+		componentName := laravelClassToComponentName(className)
+
+		fmt.Printf("Rendering dusk component: %s\n", componentName)
+
+		c.HTML(200, "livewire-dusk-component.tmpl", componentName)
+	})
+
 	srv.Use(gin.WrapH(golivewire.NewAjaxHandler()))
 
 	err := srv.Run("127.0.0.1:8081")
 	if err != nil {
 		panic(err)
 	}
+}
+
+func laravelClassToComponentName(className string) string {
+	dot := strings.ReplaceAll(className, "\\", ".")
+	return strings.ToLower(dot)
 }

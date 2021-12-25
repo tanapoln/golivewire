@@ -39,10 +39,11 @@ func (o *OutputComponent) AppendToOutput(str ...string) error {
 }
 
 func (o *OutputComponent) Pause() {
-	time.Sleep(1 * time.Second)
+	time.Sleep(50 * time.Millisecond)
 }
 
 func (o *OutputComponent) ThrowError() error {
+	time.Sleep(50 * time.Millisecond)
 	return golivewire.ErrInternalServerError.Message("err from component")
 }
 
@@ -71,7 +72,7 @@ func (o *OutputComponent) Render() (string, error) {
 		<form wire:submit.prevent="throwError">
 			<button type="submit" dusk="boo.button">Submit</button>
 		</form>
-		<input wire:keydown.debounce.75ms="setOutputTo('bap')" dusk="bap"></button>
+		<input wire:keydown.debounce.100ms="setOutputTo('bap')" dusk="bap"></button>
 		<span dusk="output">%s</span>
 	</div>
 	`

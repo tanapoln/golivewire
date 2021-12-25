@@ -108,18 +108,19 @@ func renderWithDecorators(obj interface{}, decorators ...HTMLDecorator) (string,
 		return "", err
 	}
 
-	doc, err := html.Parse(strings.NewReader(raw))
+	wrappedHTML := fmt.Sprintf("<html><body>%s</body></html>", raw)
+	doc, err := html.Parse(strings.NewReader(wrappedHTML))
 	if err != nil {
 		return "", err
 	}
 
-	node, err := extractNodeFromDoc(doc)
+	nodes, err := extractNodesFromDoc(doc)
 	if err != nil {
 		return "", err
 	}
 
 	for _, decorator := range decorators {
-		err := decorator.Decorate(node, obj)
+		err := decorator.Decorate(nodes[0], obj)
 		if err != nil {
 			return "", err
 		}
@@ -131,10 +132,13 @@ func renderWithDecorators(obj interface{}, decorators ...HTMLDecorator) (string,
 		bufPool.Put(buf)
 	}()
 
-	err = html.Render(buf, node)
-	if err != nil {
-		return "", err
+	for _, node := range nodes {
+		err = html.Render(buf, node)
+		if err != nil {
+			return "", err
+		}
 	}
+
 	err = html.Render(buf, &html.Node{
 		Type: html.CommentNode,
 		Data: fmt.Sprintf("Livewire Component wire-end:%s", obj.(baseComponentSupport).getBaseComponent().GetID()),
@@ -145,7 +149,7 @@ func renderWithDecorators(obj interface{}, decorators ...HTMLDecorator) (string,
 	return buf.String(), nil
 }
 
-func extractNodeFromDoc(node *html.Node) (*html.Node, error) {
+func extractNodesFromDoc(node *html.Node) ([]*html.Node, error) {
 	if node.Type != html.DocumentNode {
 		return nil, ErrInvalidHTMLContent
 	}
@@ -155,11 +159,22 @@ func extractNodeFromDoc(node *html.Node) (*html.Node, error) {
 		return nil, ErrInvalidHTMLContent
 	}
 
-	first := body.FirstChild
-	for n := first.NextSibling; n != nil; n = n.NextSibling {
-		if n.Type == html.ElementNode {
-			return nil, ErrInvalidHTMLContent
+	nodes := getAllHTMLChildNodeFirstMatch(body, func(n *html.Node) bool {
+		return n.Type == html.ElementNode
+	})
+	if len(nodes) == 0 {
+		return nil, ErrInvalidHTMLContent
+	}
+	return nodes, nil
+}
+
+func getAllHTMLChildNodeFirstMatch(node *html.Node, pred func(n *html.Node) bool) []*html.Node {
+	nodes := []*html.Node{}
+	n := node.FirstChild
+	for ; n != nil; n = n.NextSibling {
+		if pred(n) {
+			nodes = append(nodes, n)
 		}
 	}
-	return first, nil
+	return nodes
 }
