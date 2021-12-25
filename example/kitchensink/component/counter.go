@@ -1,8 +1,6 @@
 package component
 
 import (
-	"fmt"
-
 	"github.com/tanapoln/golivewire"
 )
 
@@ -28,13 +26,11 @@ type Counter struct {
 }
 
 func (c *Counter) Render() (string, error) {
-	template := `
+	return RenderTemplate(c, `
 	<div wire:poll>
-		Count: %d 
+		Count: {{.Count}}
 		<button wire:click="Incr">incr</button>
-	</div>
-	`
-	return fmt.Sprintf(template, c.Count), nil
+	</div>`)
 }
 
 func (c *Counter) Refresh() error {
