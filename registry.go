@@ -41,12 +41,21 @@ type factory struct {
 	name string
 }
 
-func (f factory) createInstance(ctx context.Context) baseComponentSupport {
+func (f factory) createInstance(ctx context.Context) (baseComponentSupport, error) {
 	comp := f.fn()
+
+	if req := httpRequestFromContext(ctx); req != nil {
+		binder := &defaultBinder{}
+		err := binder.BindQuery(req, comp)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	baseComp := comp.(baseComponentSupport)
 	baseComp.getBaseComponent().Name = f.name
 	baseComp.getBaseComponent().ctx = ctx
-	return baseComp
+	return baseComp, nil
 }
 
 // RegisterFactory register component factory. It's not thread-safe.

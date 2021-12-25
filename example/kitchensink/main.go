@@ -39,6 +39,11 @@ func main() {
 	})
 	srv.LoadHTMLGlob(path.Join(currentDir(), "templates", "**"))
 
+	srv.Use(func(c *gin.Context) {
+		c.Request = golivewire.WithRequestContext(c.Request)
+		c.Next()
+	})
+
 	srv.GET("/home", func(c *gin.Context) {
 		done := make(chan struct{})
 		ctx, cancelFunc := context.WithTimeout(c.Request.Context(), time.Millisecond*1000)

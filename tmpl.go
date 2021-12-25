@@ -38,7 +38,11 @@ func LivewireTemplateFunc(args ...interface{}) (template.HTML, error) {
 		return "", ErrComponentNotFound
 	}
 
-	comp := factory.createInstance(ctx)
+	comp, err := factory.createInstance(ctx)
+	if err != nil {
+		return "", err
+	}
+	
 	raw, err := InitialRender(ctx, comp.(Renderer))
 	if err != nil {
 		return "", err

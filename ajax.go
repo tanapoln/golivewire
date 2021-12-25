@@ -21,7 +21,11 @@ func NewAjaxHandler() http.Handler {
 			return nil, ErrNotFound.Message("component name is not found: " + name)
 		}
 
-		comp := compFactory.createInstance(r.Context())
+		comp, err := compFactory.createInstance(r.Context())
+		if err != nil {
+			return nil, err
+		}
+
 		req := &messageRequest{
 			ServerMemo: serverMemo{
 				Data: comp,
@@ -32,7 +36,7 @@ func NewAjaxHandler() http.Handler {
 		}
 		comp.getBaseComponent().id = req.Fingerprint.ID
 
-		err := HandleComponentMessage(req, comp)
+		err = HandleComponentMessage(req, comp)
 		if err != nil {
 			return nil, err
 		}

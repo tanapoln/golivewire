@@ -17,7 +17,6 @@ func init() {
 			BaseComponent: golivewire.BaseComponent{
 				Listeners: []string{"test"},
 			},
-			Count: count,
 		}
 	})
 }
@@ -25,25 +24,23 @@ func init() {
 type Counter struct {
 	golivewire.BaseComponent
 
-	Count int `json:"count"`
+	Count int `json:"count" query:"count"`
 }
 
 func (c *Counter) Render(ctx context.Context) (string, error) {
-	time.Sleep(900 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 	return RenderTemplate(c, `
-	<div wire:poll>
+	<div>
 		Count: {{.Count}}
 		<button wire:click="Incr">incr</button>
 	</div>`)
 }
 
 func (c *Counter) Refresh() error {
-	c.Count = count
 	return nil
 }
 
 func (c *Counter) Incr() error {
-	count++
-	c.Count = count
+	c.Count++
 	return nil
 }
