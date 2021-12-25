@@ -14,7 +14,7 @@ var (
 
 type factoryRegistry map[string]factory
 
-func (r factoryRegistry) register(fn ComponentFactoryFunc) error {
+func (r factoryRegistry) register(name string, fn ComponentFactoryFunc) error {
 	comp := fn()
 	if _, ok := comp.(Renderer); !ok {
 		return ErrNotRenderer
@@ -23,7 +23,6 @@ func (r factoryRegistry) register(fn ComponentFactoryFunc) error {
 		return ErrNotComponent
 	}
 
-	name := comp.(baseComponentSupport).getBaseComponent().Name
 	name = strings.TrimSpace(name)
 	if name == "" {
 		return ErrNoNameDefined
@@ -43,12 +42,14 @@ type factory struct {
 
 func (f factory) createInstance() baseComponentSupport {
 	comp := f.fn()
-	return comp.(baseComponentSupport)
+	baseComp := comp.(baseComponentSupport)
+	baseComp.getBaseComponent().Name = f.name
+	return baseComp
 }
 
 // RegisterFactory register component factory. It's not thread-safe.
-func RegisterFactory(fn ComponentFactoryFunc) {
-	err := componentRegistry.register(fn)
+func RegisterFactory(componentName string, fn ComponentFactoryFunc) {
+	err := componentRegistry.register(componentName, fn)
 	if err != nil {
 		panic(err)
 	}

@@ -7,12 +7,8 @@ import (
 )
 
 func init() {
-	golivewire.RegisterFactory(func() interface{} {
-		return &ComponentInit{
-			BaseComponent: golivewire.BaseComponent{
-				Name: "tests.browser.init.component",
-			},
-		}
+	golivewire.RegisterFactory("tests.browser.init.component", func() interface{} {
+		return &ComponentInit{}
 	})
 }
 
