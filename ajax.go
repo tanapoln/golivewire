@@ -21,7 +21,7 @@ func NewAjaxHandler() http.Handler {
 			return nil, ErrNotFound.Message("component name is not found: " + name)
 		}
 
-		comp := compFactory.createInstance()
+		comp := compFactory.createInstance(r.Context())
 		req := &messageRequest{
 			ServerMemo: serverMemo{
 				Data: comp,
@@ -37,7 +37,7 @@ func NewAjaxHandler() http.Handler {
 			return nil, err
 		}
 
-		html, err := renderWithDecorators(comp, rendererPipeline...)
+		html, err := renderWithDecorators(r.Context(), comp, rendererPipeline...)
 		if err != nil {
 			return nil, err
 		}

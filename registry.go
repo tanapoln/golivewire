@@ -1,6 +1,7 @@
 package golivewire
 
 import (
+	"context"
 	"errors"
 	"strings"
 )
@@ -40,10 +41,11 @@ type factory struct {
 	name string
 }
 
-func (f factory) createInstance() baseComponentSupport {
+func (f factory) createInstance(ctx context.Context) baseComponentSupport {
 	comp := f.fn()
 	baseComp := comp.(baseComponentSupport)
 	baseComp.getBaseComponent().Name = f.name
+	baseComp.getBaseComponent().ctx = ctx
 	return baseComp
 }
 

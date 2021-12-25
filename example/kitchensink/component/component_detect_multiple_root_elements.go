@@ -1,7 +1,7 @@
 package component
 
 import (
-	"fmt"
+	"context"
 
 	"github.com/tanapoln/golivewire"
 )
@@ -28,7 +28,7 @@ type ComponentWithCommentAsFirstElement struct {
 	golivewire.BaseComponent
 }
 
-func (c *ComponentWithCommentAsFirstElement) Render() (string, error) {
+func (c *ComponentWithCommentAsFirstElement) Render(ctx context.Context) (string, error) {
 	tmpl := `
 	<!-- A comment here -->
 	<div>Element</div>
@@ -40,7 +40,7 @@ type ComponentWithMultipleRootElements struct {
 	golivewire.BaseComponent
 }
 
-func (c *ComponentWithMultipleRootElements) Render() (string, error) {
+func (c *ComponentWithMultipleRootElements) Render(ctx context.Context) (string, error) {
 	tmpl := `
 	<div>Element 1</div>
 	<div>Element 2</div>
@@ -52,27 +52,20 @@ type ComponentWithNestedSingleRootElement struct {
 	golivewire.BaseComponent
 }
 
-func (c *ComponentWithNestedSingleRootElement) Render() (string, error) {
-	tmpl := `
+func (c *ComponentWithNestedSingleRootElement) Render(ctx context.Context) (string, error) {
+	return RenderTemplate(c, `
 	<div>
-		Nested: %s
+		Nested: {{livewire "tests.browser.detectmultiplerootelements.componentwithsinglerootelement"}}
 		<span>Dummy Element</span>
 	</div>
-	`
-
-	t, err := golivewire.LivewireTemplateFunc("tests.browser.detectmultiplerootelements.componentwithsinglerootelement")
-	if err != nil {
-		return "", err
-	}
-
-	return fmt.Sprintf(tmpl, t), nil
+	`)
 }
 
 type ComponentWithSingleRootElement struct {
 	golivewire.BaseComponent
 }
 
-func (c *ComponentWithSingleRootElement) Render() (string, error) {
+func (c *ComponentWithSingleRootElement) Render(ctx context.Context) (string, error) {
 	tmpl := `
 	<div>Only Element</div>
 	`

@@ -2,6 +2,7 @@ package golivewire
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -91,11 +92,11 @@ func livewireInitialDataRenderer(node *html.Node, component interface{}) error {
 	return nil
 }
 
-func InitialRender(obj interface{}) (string, error) {
-	return renderWithDecorators(obj, initialRendererPipeline...)
+func InitialRender(ctx context.Context, obj interface{}) (string, error) {
+	return renderWithDecorators(ctx, obj, initialRendererPipeline...)
 }
 
-func renderWithDecorators(obj interface{}, decorators ...HTMLDecorator) (string, error) {
+func renderWithDecorators(ctx context.Context, obj interface{}, decorators ...HTMLDecorator) (string, error) {
 	if _, ok := obj.(Renderer); !ok {
 		return "", ErrNotRenderer
 	}
@@ -103,8 +104,11 @@ func renderWithDecorators(obj interface{}, decorators ...HTMLDecorator) (string,
 		return "", ErrNotComponent
 	}
 
-	raw, err := obj.(Renderer).Render()
+	raw, err := obj.(Renderer).Render(ctx)
 	if err != nil {
+		return "", err
+	}
+	if err := ctx.Err(); err != nil {
 		return "", err
 	}
 
@@ -124,6 +128,9 @@ func renderWithDecorators(obj interface{}, decorators ...HTMLDecorator) (string,
 		if err != nil {
 			return "", err
 		}
+		if err := ctx.Err(); err != nil {
+			return "", err
+		}
 	}
 
 	buf := bufPool.Get().(*bytes.Buffer)
@@ -135,6 +142,9 @@ func renderWithDecorators(obj interface{}, decorators ...HTMLDecorator) (string,
 	for _, node := range nodes {
 		err = html.Render(buf, node)
 		if err != nil {
+			return "", err
+		}
+		if err := ctx.Err(); err != nil {
 			return "", err
 		}
 	}

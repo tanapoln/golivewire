@@ -1,7 +1,9 @@
 package golivewire
 
+import "context"
+
 type Renderer interface {
-	Render() (string, error)
+	Render(ctx context.Context) (string, error)
 }
 
 type ComponentFactoryFunc func() interface{}

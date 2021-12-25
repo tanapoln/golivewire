@@ -1,6 +1,8 @@
 package component
 
 import (
+	"context"
+
 	"github.com/tanapoln/golivewire"
 )
 
@@ -17,7 +19,7 @@ type ComponentPooling struct {
 	Count   int
 }
 
-func (c *ComponentPooling) Render() (string, error) {
+func (c *ComponentPooling) Render(ctx context.Context) (string, error) {
 	c.Count++
 
 	return RenderTemplate(c, `

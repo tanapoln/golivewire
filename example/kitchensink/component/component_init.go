@@ -1,6 +1,7 @@
 package component
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/tanapoln/golivewire"
@@ -22,7 +23,7 @@ func (o *ComponentInit) SetOutputToFoo() {
 	o.Output = "foo"
 }
 
-func (c *ComponentInit) Render() (string, error) {
+func (c *ComponentInit) Render(ctx context.Context) (string, error) {
 	tmpl := `
 		<div wire:init="setOutputToFoo">
 			<span dusk="output">%s</span>

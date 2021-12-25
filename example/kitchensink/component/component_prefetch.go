@@ -1,6 +1,8 @@
 package component
 
 import (
+	"context"
+
 	"github.com/tanapoln/golivewire"
 )
 
@@ -18,7 +20,7 @@ type ComponentPrefetch struct {
 	golivewire.BaseComponent
 }
 
-func (c *ComponentPrefetch) Render() (string, error) {
+func (c *ComponentPrefetch) Render(ctx context.Context) (string, error) {
 	prefetchCount++
 
 	return RenderTemplate(c, `

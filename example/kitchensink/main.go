@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"html/template"
 	"path"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/cors"
@@ -38,7 +40,27 @@ func main() {
 	srv.LoadHTMLGlob(path.Join(currentDir(), "templates", "**"))
 
 	srv.GET("/home", func(c *gin.Context) {
-		c.HTML(200, "home.tmpl", nil)
+		done := make(chan struct{})
+		ctx, cancelFunc := context.WithTimeout(c.Request.Context(), time.Millisecond*1000)
+		defer cancelFunc()
+
+		go func() {
+			defer func() {
+				if err := recover(); err != nil {
+					fmt.Printf("Recover: %s\n", err)
+				}
+			}()
+
+			c.HTML(200, "home.tmpl", ctx)
+			done <- struct{}{}
+		}()
+
+		select {
+		case <-done:
+			return
+		case <-ctx.Done():
+			c.String(503, "Server timeout exceeded")
+		}
 	})
 
 	srv.GET("/livewire-dusk/:class", func(c *gin.Context) {

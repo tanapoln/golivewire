@@ -1,6 +1,7 @@
 package component
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
@@ -43,7 +44,7 @@ func (o *OutputComponent) ThrowError() error {
 	return golivewire.ErrInternalServerError.Message("err from component")
 }
 
-func (o *OutputComponent) Render() (string, error) {
+func (o *OutputComponent) Render(ctx context.Context) (string, error) {
 	template := `
 	<div>
 		<button type="button" wire:click="setOutputToFoo" dusk="foo">Foo</button>

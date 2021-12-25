@@ -1,6 +1,9 @@
 package component
 
 import (
+	"context"
+	"time"
+
 	"github.com/tanapoln/golivewire"
 )
 
@@ -25,7 +28,8 @@ type Counter struct {
 	Count int `json:"count"`
 }
 
-func (c *Counter) Render() (string, error) {
+func (c *Counter) Render(ctx context.Context) (string, error) {
+	time.Sleep(900 * time.Millisecond)
 	return RenderTemplate(c, `
 	<div wire:poll>
 		Count: {{.Count}}
