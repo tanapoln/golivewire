@@ -51,7 +51,7 @@ func (h *messageHandler) OnCallMethod(upd updateAction) error {
 func (h *messageHandler) doCallMethod(method reflect.Value, args ...interface{}) error {
 	argsRef := make([]reflect.Value, 0, len(args))
 	for _, param := range args {
-		args = append(args, reflect.ValueOf(param))
+		argsRef = append(argsRef, reflect.ValueOf(param))
 	}
 
 	returns := method.Call(argsRef)
