@@ -2,7 +2,6 @@ package golivewire
 
 import (
 	"context"
-	"github.com/rs/xid"
 )
 
 type BaseComponent struct {
@@ -17,9 +16,6 @@ type BaseComponent struct {
 }
 
 func (c *BaseComponent) ID() string {
-	if c.id == "" {
-		c.id = xid.New().String()
-	}
 	return c.id
 }
 

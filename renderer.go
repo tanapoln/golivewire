@@ -158,33 +158,3 @@ func renderWithDecorators(ctx context.Context, obj interface{}, decorators ...HT
 	}
 	return buf.String(), nil
 }
-
-func extractNodesFromDoc(node *html.Node) ([]*html.Node, error) {
-	if node.Type != html.DocumentNode {
-		return nil, ErrInvalidHTMLContent
-	}
-	body := node.FirstChild.FirstChild.NextSibling
-
-	if body.Type != html.ElementNode && body.Data != "body" {
-		return nil, ErrInvalidHTMLContent
-	}
-
-	nodes := getAllHTMLChildNodeFirstMatch(body, func(n *html.Node) bool {
-		return n.Type == html.ElementNode
-	})
-	if len(nodes) == 0 {
-		return nil, ErrInvalidHTMLContent
-	}
-	return nodes, nil
-}
-
-func getAllHTMLChildNodeFirstMatch(node *html.Node, pred func(n *html.Node) bool) []*html.Node {
-	nodes := []*html.Node{}
-	n := node.FirstChild
-	for ; n != nil; n = n.NextSibling {
-		if pred(n) {
-			nodes = append(nodes, n)
-		}
-	}
-	return nodes
-}

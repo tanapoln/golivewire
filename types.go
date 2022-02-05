@@ -1,6 +1,9 @@
 package golivewire
 
-import "context"
+import (
+	"context"
+	"html/template"
+)
 
 type Renderer interface {
 	Render(ctx context.Context) (string, error)
@@ -45,7 +48,7 @@ type dataMeta struct {
 }
 
 type Effects struct {
-	Html       string                 `json:"html"`
+	Html       template.HTML          `json:"html"`
 	Dirty      []string               `json:"dirty"`
 	HtmlHash   string                 `json:"htmlHash,omitempty"`
 	Returns    map[string]interface{} `json:"returns,omitempty"`

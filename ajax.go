@@ -1,6 +1,7 @@
 package golivewire
 
 import (
+	"html/template"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -48,7 +49,7 @@ func NewAjaxHandler() http.Handler {
 
 		resp := Response{
 			Effects: Effects{
-				Html:  html,
+				Html:  template.HTML(html),
 				Dirty: []string{},
 			},
 			ServerMemo: serverMemo{

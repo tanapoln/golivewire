@@ -3,6 +3,7 @@ package golivewire
 import (
 	"context"
 	"errors"
+	"github.com/rs/xid"
 	"strings"
 )
 
@@ -20,9 +21,6 @@ func (r factoryRegistry) register(name string, fn ComponentFactoryFunc) error {
 	comp := fn()
 	if _, ok := comp.(Renderer); !ok {
 		return ErrNotRenderer
-	}
-	if _, ok := comp.(Component); !ok {
-		return ErrNotComponent
 	}
 
 	name = strings.TrimSpace(name)
@@ -53,20 +51,14 @@ func (f factory) createInstance(ctx context.Context) (Component, error) {
 
 	comp := f.fn()
 
-	if req := httpRequestFromContext(ctx); req != nil {
-		binder := &defaultBinder{}
-		err := binder.BindQuery(req, comp)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	base := comp.(Component).getBaseComponent()
+	manager := managerFromCtx(ctx)
+	base := comp.getBaseComponent()
+	base.id = xid.New().String()
 	base.name = f.name
 	base.ctx = ctx
 	base.component = comp
-	base.manager = managerFromCtx(ctx)
-	return comp.(Component), nil
+	base.manager = manager
+	return comp, nil
 }
 
 // RegisterFactory register component factory. It's not thread-safe.
