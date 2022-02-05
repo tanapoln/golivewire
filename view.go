@@ -69,6 +69,10 @@ func (v *htmlView) init() error {
 	return nil
 }
 
+func (v *htmlView) AppendHtmlNode(n *html.Node) {
+	v.nodes = append(v.nodes, n)
+}
+
 func extractNodesFromDoc(node *html.Node) ([]*html.Node, error) {
 	if node.Type != html.DocumentNode {
 		return nil, ErrInvalidHTMLContent

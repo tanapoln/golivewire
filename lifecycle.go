@@ -3,6 +3,7 @@ package golivewire
 import (
 	"encoding/json"
 	"github.com/mitchellh/mapstructure"
+	"golang.org/x/net/html"
 )
 
 func newLifecycleFromSubsequentRequest(manager *livewireManager) (*lifecycleManager, error) {
@@ -97,6 +98,11 @@ func (l *lifecycleManager) Dehydrate() error {
 func (l *lifecycleManager) InitialDehydrate() error {
 	l.copyRequestToResponse()
 	l.response.ServerMemo.Data = l.component
+	l.component.getBaseComponent().preRenderView.AppendHtmlNode(&html.Node{
+		Type: html.CommentNode,
+		Data: "Livewire Component wire-end:" + l.component.getBaseComponent().ID(),
+	})
+
 	return nil
 }
 

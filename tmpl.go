@@ -37,6 +37,9 @@ func LivewireTemplateFunc(args ...interface{}) (template.HTML, error) {
 	}
 
 	manager := managerFromCtx(ctx)
+	if manager == nil {
+		return "", errors.New("invalid context, no golivewire manager found")
+	}
 
 	component, err := manager.NewComponentInstance(componentName)
 	if err != nil {

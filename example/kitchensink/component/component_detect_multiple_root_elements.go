@@ -55,7 +55,7 @@ type ComponentWithNestedSingleRootElement struct {
 func (c *ComponentWithNestedSingleRootElement) Render(ctx context.Context) (string, error) {
 	return RenderTemplate(c, `
 	<div>
-		Nested: {{livewire "tests.browser.detectmultiplerootelements.componentwithsinglerootelement"}}
+		Nested: {{livewire "tests.browser.detectmultiplerootelements.componentwithsinglerootelement" .}}
 		<span>Dummy Element</span>
 	</div>
 	`)

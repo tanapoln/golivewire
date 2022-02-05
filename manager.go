@@ -17,7 +17,11 @@ func newManagerCtx(ctx context.Context, req *http.Request) (context.Context, *li
 }
 
 func managerFromCtx(ctx context.Context) *livewireManager {
-	return ctx.Value(managerCtxKey{}).(*livewireManager)
+	v := ctx.Value(managerCtxKey{})
+	if v == nil {
+		return nil
+	}
+	return v.(*livewireManager)
 }
 
 type livewireManager struct {
