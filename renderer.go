@@ -68,12 +68,12 @@ func livewireInitialDataRenderer(ctx context.Context, node *html.Node, component
 		baseComp = v.getBaseComponent()
 	}
 
-	initData := componentData{
+	initData := Response{
 		Fingerprint: fingerprint{
 			ID:   baseComp.ID(),
 			Name: baseComp.name,
 		},
-		Effects: componentEffects{
+		Effects: Effects{
 			Listeners: baseComp.listeners,
 		},
 		ServerMemo: serverMemo{

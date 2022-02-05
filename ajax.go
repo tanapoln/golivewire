@@ -26,7 +26,7 @@ func NewAjaxHandler() http.Handler {
 			return nil, err
 		}
 
-		req := &messageRequest{
+		req := &Request{
 			ServerMemo: serverMemo{
 				Data: comp,
 			},
@@ -46,8 +46,8 @@ func NewAjaxHandler() http.Handler {
 			return nil, err
 		}
 
-		resp := messageResponse{
-			Effects: messageEffects{
+		resp := Response{
+			Effects: Effects{
 				Html:  html,
 				Dirty: []string{},
 			},

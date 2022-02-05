@@ -14,7 +14,7 @@ var (
 type messageHandler struct {
 	comp Component
 	ref  reflect.Value
-	req  *messageRequest
+	req  *Request
 }
 
 func (h *messageHandler) OnCallMethod(upd updateAction) error {
@@ -79,7 +79,7 @@ func (h *messageHandler) doSetField(field string, val interface{}) error {
 	return nil
 }
 
-func newMessageHandler(req *messageRequest, comp Component) *messageHandler {
+func newMessageHandler(req *Request, comp Component) *messageHandler {
 	return &messageHandler{
 		comp: comp,
 		ref:  reflect.ValueOf(comp),
@@ -87,7 +87,7 @@ func newMessageHandler(req *messageRequest, comp Component) *messageHandler {
 	}
 }
 
-func HandleComponentMessage(req *messageRequest, comp Component) error {
+func HandleComponentMessage(req *Request, comp Component) error {
 	hnd := newMessageHandler(req, comp)
 	for _, upd := range req.Updates {
 		switch upd.Type {

@@ -8,21 +8,16 @@ type Renderer interface {
 
 type ComponentFactoryFunc func() Component
 
-type messageRequest struct {
+type Request struct {
 	Fingerprint fingerprint    `json:"fingerprint,omitempty"`
 	ServerMemo  serverMemo     `json:"serverMemo,omitempty"`
 	Updates     []updateAction `json:"updates,omitempty"`
 }
 
-type messageResponse struct {
-	Effects    messageEffects `json:"effects,omitempty"`
-	ServerMemo serverMemo     `json:"serverMemo,omitempty"`
-}
-
-type componentData struct {
-	Fingerprint fingerprint      `json:"fingerprint,omitempty"`
-	Effects     componentEffects `json:"effects,omitempty"`
-	ServerMemo  serverMemo       `json:"serverMemo,omitempty"`
+type Response struct {
+	Fingerprint fingerprint `json:"fingerprint,omitempty"`
+	Effects     Effects     `json:"effects,omitempty"`
+	ServerMemo  serverMemo  `json:"serverMemo,omitempty"`
 }
 
 type fingerprint struct {
@@ -34,25 +29,54 @@ type fingerprint struct {
 }
 
 type serverMemo struct {
-	Data interface{} `json:"data"`
+	Data     interface{}   `json:"data"`
+	HtmlHash string        `json:"htmlHash,omitempty"`
+	Checksum string        `json:"checksum,omitempty"`
+	Children []interface{} `json:"children,omitempty"`
+	Errors   []interface{} `json:"errors,omitempty"`
+	DataMeta dataMeta      `json:"dataMeta,omitempty"`
 }
 
-type messageEffects struct {
-	Html  string   `json:"html"`
-	Dirty []string `json:"dirty"`
+type dataMeta struct {
+	Date        map[string]string `json:"date,omitempty"`
+	Collections interface{}       `json:"collections,omitempty"`
+	Wirables    []interface{}     `json:"wirables,omitempty"`
+	Stringables []interface{}     `json:"stringables,omitempty"`
 }
 
-type componentEffects struct {
-	Listeners []string `json:"listeners,omitempty"`
+type Effects struct {
+	Html       string                 `json:"html"`
+	Dirty      []string               `json:"dirty"`
+	HtmlHash   string                 `json:"htmlHash,omitempty"`
+	Returns    map[string]interface{} `json:"returns,omitempty"`
+	Path       string                 `json:"path,omitempty"`
+	Listeners  []string               `json:"listeners,omitempty"`
+	Emits      []interface{}          `json:"emits,omitempty"`
+	Dispatches []interface{}          `json:"dispatches,omitempty"`
+	Download   interface{}            `json:"download,omitempty"`
+	Redirect   interface{}            `json:"redirect,omitempty"`
+	ForStack   interface{}            `json:"forStack,omitempty"`
 }
 
 type updateAction struct {
+	//Possible: callMethod, syncInput, fireEvent
 	Type    string              `json:"type,omitempty"`
 	Payload updateActionPayload `json:"payload,omitempty"`
 }
 
 type updateActionPayload struct {
-	ID     string        `json:"id"`
-	Method string        `json:"method"`
+	//for callMethod and fireEvent
+	ID string `json:"id"`
+	//for callMethod and fireEvent
 	Params []interface{} `json:"params"`
+
+	//for callMethod. common method: $sync, $set, $toggle, $refresh. see: \Livewire\ComponentConcerns\HandlesActions::callMethod
+	Method string `json:"method"`
+
+	//for syncInput
+	Name  string      `json:"name"`
+	Value interface{} `json:"value"`
+
+	//for fireEvent
+	Event string `json:"event"`
 }

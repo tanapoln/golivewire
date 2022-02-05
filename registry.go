@@ -7,10 +7,11 @@ import (
 )
 
 var (
-	componentRegistry = factoryRegistry{}
-	ErrNotComponent   = errors.New("object must embeded golivewire.BaseComponent")
-	ErrNoNameDefined  = errors.New("component must have name defined, cannot be empty")
-	ErrNotRenderer    = errors.New("object must implement golivewire.Renderer")
+	componentRegistry  = factoryRegistry{}
+	ErrNotComponent    = errors.New("object must embeded golivewire.BaseComponent")
+	ErrNoNameDefined   = errors.New("component must have name defined, cannot be empty")
+	ErrNotRenderer     = errors.New("object must implement golivewire.Renderer")
+	ErrCreateComponent = errors.New("cannot create component, component is not valid")
 )
 
 type factoryRegistry map[string]factory
@@ -41,7 +42,15 @@ type factory struct {
 	name string
 }
 
+func (f factory) valid() bool {
+	return f.fn != nil
+}
+
 func (f factory) createInstance(ctx context.Context) (Component, error) {
+	if !f.valid() {
+		return nil, ErrCreateComponent
+	}
+
 	comp := f.fn()
 
 	if req := httpRequestFromContext(ctx); req != nil {
@@ -56,6 +65,7 @@ func (f factory) createInstance(ctx context.Context) (Component, error) {
 	base.name = f.name
 	base.ctx = ctx
 	base.component = comp
+	base.manager = managerFromCtx(ctx)
 	return comp.(Component), nil
 }
 

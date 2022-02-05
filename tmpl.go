@@ -28,7 +28,7 @@ func LivewireTemplateFunc(args ...interface{}) (template.HTML, error) {
 			break
 		}
 		if v, ok := arg.(Component); ok {
-			ctx = v.getBaseComponent().getContext()
+			ctx = v.getBaseComponent().ctx
 			break
 		}
 	}
