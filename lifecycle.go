@@ -37,11 +37,24 @@ type lifecycleManager struct {
 	response  Response
 }
 
-func (l *lifecycleManager) boot() error {
+func (l *lifecycleManager) Boot() error {
 	return nil
 }
 
-func (l *lifecycleManager) hydrate() error {
+func (l *lifecycleManager) Hydrate() error {
+	err := l.bindDataToComponent()
+	if err != nil {
+		return err
+	}
+
+	if err := l.handleMessage(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (l *lifecycleManager) bindDataToComponent() error {
 	if data, ok := l.request.ServerMemo.Data.(map[string]interface{}); ok {
 		decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 			TagName: "json",
@@ -54,24 +67,19 @@ func (l *lifecycleManager) hydrate() error {
 			return err
 		}
 	}
-
-	if err := HandleComponentMessage(&l.request, l.component); err != nil {
-		return err
-	}
-
 	return nil
 }
 
-func (l *lifecycleManager) initialHydrate() error {
+func (l *lifecycleManager) InitialHydrate() error {
 	return nil
 }
 
-func (l *lifecycleManager) month() error {
+func (l *lifecycleManager) Month() error {
 	//TODO Sharp: bind params to component
 	return nil
 }
 
-func (l *lifecycleManager) renderToView() error {
+func (l *lifecycleManager) RenderToView() error {
 	_, err := l.component.getBaseComponent().renderToView()
 	if err != nil {
 		return err
@@ -80,19 +88,19 @@ func (l *lifecycleManager) renderToView() error {
 	return nil
 }
 
-func (l *lifecycleManager) dehydrate() error {
+func (l *lifecycleManager) Dehydrate() error {
 	l.copyRequestToResponse()
 	l.response.ServerMemo.Data = l.component
 	return nil
 }
 
-func (l *lifecycleManager) initialDehydrate() error {
+func (l *lifecycleManager) InitialDehydrate() error {
 	l.copyRequestToResponse()
 	l.response.ServerMemo.Data = l.component
 	return nil
 }
 
-func (l *lifecycleManager) toInitialResponse() error {
+func (l *lifecycleManager) ToInitialResponse() error {
 	comp := l.component.getBaseComponent()
 	view := comp.preRenderView
 
@@ -113,7 +121,7 @@ func (l *lifecycleManager) toInitialResponse() error {
 	return nil
 }
 
-func (l *lifecycleManager) toSubsequentResponse() error {
+func (l *lifecycleManager) ToSubsequentResponse() error {
 	comp := l.component.getBaseComponent()
 	view := comp.preRenderView
 
@@ -132,4 +140,19 @@ func (l *lifecycleManager) copyRequestToResponse() {
 	l.response.Fingerprint = l.request.Fingerprint
 	l.response.ServerMemo = l.request.ServerMemo
 	l.response.Effects.Dirty = []string{}
+}
+
+func (l *lifecycleManager) handleMessage() error {
+	hnd := newMessageHandler(&l.request, l.component)
+	for _, upd := range l.request.Updates {
+		switch upd.Type {
+		case "callMethod":
+			err := hnd.OnCallMethod(upd)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }

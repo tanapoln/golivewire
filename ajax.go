@@ -24,16 +24,16 @@ func NewAjaxHandler() http.Handler {
 		if err != nil {
 			return nil, err
 		}
-		if err := lifecycle.hydrate(); err != nil {
+		if err := lifecycle.Hydrate(); err != nil {
 			return nil, err
 		}
-		if err := lifecycle.renderToView(); err != nil {
+		if err := lifecycle.RenderToView(); err != nil {
 			return nil, err
 		}
-		if err := lifecycle.dehydrate(); err != nil {
+		if err := lifecycle.Dehydrate(); err != nil {
 			return nil, err
 		}
-		if err := lifecycle.toSubsequentResponse(); err != nil {
+		if err := lifecycle.ToSubsequentResponse(); err != nil {
 			return nil, err
 		}
 

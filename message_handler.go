@@ -87,21 +87,6 @@ func newMessageHandler(req *Request, comp Component) *messageHandler {
 	}
 }
 
-func HandleComponentMessage(req *Request, comp Component) error {
-	hnd := newMessageHandler(req, comp)
-	for _, upd := range req.Updates {
-		switch upd.Type {
-		case "callMethod":
-			err := hnd.OnCallMethod(upd)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
-}
-
 func coalesceMethodName(name string) string {
 	name = strings.TrimSpace(name)
 	if name == "" {

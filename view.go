@@ -2,9 +2,14 @@ package golivewire
 
 import (
 	"bytes"
+	"errors"
 	"golang.org/x/net/html"
 	"html/template"
 	"strings"
+)
+
+var (
+	ErrInvalidHTMLContent = errors.New("invalid HTML content")
 )
 
 func newHTMLView(raw string) (*htmlView, error) {

@@ -44,19 +44,19 @@ func LivewireTemplateFunc(args ...interface{}) (template.HTML, error) {
 	}
 
 	lifecycle := newLifecycleFromInitialComponent(component)
-	if err := lifecycle.initialHydrate(); err != nil {
+	if err := lifecycle.InitialHydrate(); err != nil {
 		return "", err
 	}
-	if err := lifecycle.month(); err != nil {
+	if err := lifecycle.Month(); err != nil {
 		return "", err
 	}
-	if err := lifecycle.renderToView(); err != nil {
+	if err := lifecycle.RenderToView(); err != nil {
 		return "", err
 	}
-	if err := lifecycle.initialDehydrate(); err != nil {
+	if err := lifecycle.InitialDehydrate(); err != nil {
 		return "", err
 	}
-	if err := lifecycle.toInitialResponse(); err != nil {
+	if err := lifecycle.ToInitialResponse(); err != nil {
 		return "", err
 	}
 
