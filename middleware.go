@@ -1,7 +1,6 @@
 package golivewire
 
 import (
-	"context"
 	"net/http"
 )
 
@@ -14,19 +13,6 @@ func LivewireMiddleware(next http.Handler) http.Handler {
 }
 
 func WithRequestContext(r *http.Request) *http.Request {
-	ctx := context.WithValue(r.Context(), httpRequestContext{}, r)
-	newReq := r.WithContext(ctx)
-	return newReq
-}
-
-func httpRequestFromContext(ctx context.Context) *http.Request {
-	val := ctx.Value(httpRequestContext{})
-	if val == nil {
-		return nil
-	}
-	if req, ok := val.(*http.Request); ok {
-		return req
-	} else {
-		return nil
-	}
+	ctx, _ := newManagerCtx(r.Context(), r)
+	return r.WithContext(ctx)
 }

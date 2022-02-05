@@ -24,8 +24,13 @@ func NewAjaxHandler() http.Handler {
 		if err != nil {
 			return nil, err
 		}
-
+		if err := lifecycle.hydrate(); err != nil {
+			return nil, err
+		}
 		if err := lifecycle.renderToView(); err != nil {
+			return nil, err
+		}
+		if err := lifecycle.dehydrate(); err != nil {
 			return nil, err
 		}
 		if err := lifecycle.toSubsequentResponse(); err != nil {

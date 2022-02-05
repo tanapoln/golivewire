@@ -38,6 +38,14 @@ func (l *livewireManager) OriginalMethod() string {
 	return l.httpReq.Method
 }
 
+func (l *livewireManager) NewComponentInstance(name string) (Component, error) {
+	compFactory, ok := componentRegistry[name]
+	if !ok {
+		return nil, ErrNotFound.Message("component name is not found: " + name)
+	}
+	return compFactory.createInstance(l.ctx)
+}
+
 func (l *livewireManager) GetComponentInstance(name string, id string) (Component, error) {
 	compFactory, ok := componentRegistry[name]
 	if !ok {

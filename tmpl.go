@@ -21,7 +21,7 @@ func LivewireTemplateFunc(args ...interface{}) (template.HTML, error) {
 		componentName = name
 	}
 
-	ctx := context.Background()
+	var ctx context.Context
 	for _, arg := range args {
 		if v, ok := arg.(context.Context); ok {
 			ctx = v
@@ -32,20 +32,33 @@ func LivewireTemplateFunc(args ...interface{}) (template.HTML, error) {
 			break
 		}
 	}
-
-	factory, ok := componentRegistry[componentName]
-	if !ok {
-		return "", ErrComponentNotFound
+	if ctx == nil {
+		return "", errors.New("no context or component on render")
 	}
 
-	comp, err := factory.createInstance(ctx)
+	manager := managerFromCtx(ctx)
+
+	component, err := manager.NewComponentInstance(componentName)
 	if err != nil {
 		return "", err
 	}
 
-	raw, err := InitialRender(ctx, comp.(Renderer))
-	if err != nil {
+	lifecycle := newLifecycleFromInitialComponent(component)
+	if err := lifecycle.initialHydrate(); err != nil {
 		return "", err
 	}
-	return template.HTML(raw), nil
+	if err := lifecycle.month(); err != nil {
+		return "", err
+	}
+	if err := lifecycle.renderToView(); err != nil {
+		return "", err
+	}
+	if err := lifecycle.initialDehydrate(); err != nil {
+		return "", err
+	}
+	if err := lifecycle.toInitialResponse(); err != nil {
+		return "", err
+	}
+
+	return lifecycle.response.Effects.Html, nil
 }
