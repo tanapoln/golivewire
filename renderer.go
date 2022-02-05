@@ -13,7 +13,7 @@ import (
 )
 
 type HTMLDecorator interface {
-	Decorate(node *html.Node, component interface{}) error
+	Decorate(ctx context.Context, node *html.Node, component interface{}) error
 }
 
 var (
@@ -38,13 +38,13 @@ func AddDecorator(decorator HTMLDecorator) {
 	rendererPipeline = append(rendererPipeline, decorator)
 }
 
-type htmlDecoratorFunc func(node *html.Node, component interface{}) error
+type htmlDecoratorFunc func(ctx context.Context, node *html.Node, component interface{}) error
 
-func (h htmlDecoratorFunc) Decorate(node *html.Node, component interface{}) error {
-	return h(node, component)
+func (h htmlDecoratorFunc) Decorate(ctx context.Context, node *html.Node, component interface{}) error {
+	return h(ctx, node, component)
 }
 
-func livewireIdRenderer(node *html.Node, component interface{}) error {
+func livewireIdRenderer(ctx context.Context, node *html.Node, component interface{}) error {
 	var baseComp *BaseComponent
 	if v, ok := component.(baseComponentSupport); !ok {
 		return ErrNotComponent
@@ -54,13 +54,13 @@ func livewireIdRenderer(node *html.Node, component interface{}) error {
 
 	node.Attr = append(node.Attr, html.Attribute{
 		Key: "wire:id",
-		Val: baseComp.GetID(),
+		Val: baseComp.ID(),
 	})
 
 	return nil
 }
 
-func livewireInitialDataRenderer(node *html.Node, component interface{}) error {
+func livewireInitialDataRenderer(ctx context.Context, node *html.Node, component interface{}) error {
 	var baseComp *BaseComponent
 	if v, ok := component.(baseComponentSupport); !ok {
 		return ErrNotComponent
@@ -70,11 +70,11 @@ func livewireInitialDataRenderer(node *html.Node, component interface{}) error {
 
 	initData := componentData{
 		Fingerprint: fingerprint{
-			ID:   baseComp.GetID(),
-			Name: baseComp.Name,
+			ID:   baseComp.ID(),
+			Name: baseComp.name,
 		},
 		Effects: componentEffects{
-			Listeners: baseComp.Listeners,
+			Listeners: baseComp.listeners,
 		},
 		ServerMemo: serverMemo{
 			Data: component,
@@ -124,7 +124,7 @@ func renderWithDecorators(ctx context.Context, obj interface{}, decorators ...HT
 	}
 
 	for _, decorator := range decorators {
-		err := decorator.Decorate(nodes[0], obj)
+		err := decorator.Decorate(ctx, nodes[0], obj)
 		if err != nil {
 			return "", err
 		}
@@ -151,7 +151,7 @@ func renderWithDecorators(ctx context.Context, obj interface{}, decorators ...HT
 
 	err = html.Render(buf, &html.Node{
 		Type: html.CommentNode,
-		Data: fmt.Sprintf("Livewire Component wire-end:%s", obj.(baseComponentSupport).getBaseComponent().GetID()),
+		Data: fmt.Sprintf("Livewire Component wire-end:%s", obj.(baseComponentSupport).getBaseComponent().ID()),
 	})
 	if err != nil {
 		return "", err
