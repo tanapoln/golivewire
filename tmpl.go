@@ -27,7 +27,7 @@ func LivewireTemplateFunc(args ...interface{}) (template.HTML, error) {
 			ctx = v
 			break
 		}
-		if v, ok := arg.(baseComponentSupport); ok {
+		if v, ok := arg.(Component); ok {
 			ctx = v.getBaseComponent().getContext()
 			break
 		}
@@ -42,7 +42,7 @@ func LivewireTemplateFunc(args ...interface{}) (template.HTML, error) {
 	if err != nil {
 		return "", err
 	}
-	
+
 	raw, err := InitialRender(ctx, comp.(Renderer))
 	if err != nil {
 		return "", err

@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	golivewire.RegisterFactory("tests.browser.polling.component", func() interface{} {
+	golivewire.RegisterFactory("tests.browser.polling.component", func() golivewire.Component {
 		return &ComponentPooling{}
 	})
 }

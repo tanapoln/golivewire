@@ -6,7 +6,7 @@ type Renderer interface {
 	Render(ctx context.Context) (string, error)
 }
 
-type ComponentFactoryFunc func() interface{}
+type ComponentFactoryFunc func() Component
 
 type messageRequest struct {
 	Fingerprint fingerprint    `json:"fingerprint,omitempty"`

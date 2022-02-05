@@ -12,7 +12,7 @@ var (
 )
 
 func init() {
-	golivewire.RegisterFactory("counter", func() interface{} {
+	golivewire.RegisterFactory("counter", func() golivewire.Component {
 		c := &Counter{}
 		c.WithListeners("test")
 		return c

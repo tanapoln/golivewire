@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	golivewire.RegisterFactory("tests.browser.actions.component", func() interface{} {
+	golivewire.RegisterFactory("tests.browser.actions.component", func() golivewire.Component {
 		return &OutputComponent{}
 	})
 }

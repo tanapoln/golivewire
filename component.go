@@ -11,6 +11,7 @@ type BaseComponent struct {
 	name      string
 	listeners []string
 	ctx       context.Context
+	component interface{}
 }
 
 func (b *BaseComponent) ID() string {
@@ -40,6 +41,6 @@ func (b *BaseComponent) getBaseComponent() *BaseComponent {
 	return b
 }
 
-type baseComponentSupport interface {
+type Component interface {
 	getBaseComponent() *BaseComponent
 }

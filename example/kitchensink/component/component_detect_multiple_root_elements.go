@@ -7,19 +7,19 @@ import (
 )
 
 func init() {
-	golivewire.RegisterFactory("tests.browser.detectmultiplerootelements.componentwithcommentasfirstelement", func() interface{} {
+	golivewire.RegisterFactory("tests.browser.detectmultiplerootelements.componentwithcommentasfirstelement", func() golivewire.Component {
 		return &ComponentWithCommentAsFirstElement{}
 	})
 
-	golivewire.RegisterFactory("tests.browser.detectmultiplerootelements.componentwithmultiplerootelements", func() interface{} {
+	golivewire.RegisterFactory("tests.browser.detectmultiplerootelements.componentwithmultiplerootelements", func() golivewire.Component {
 		return &ComponentWithMultipleRootElements{}
 	})
 
-	golivewire.RegisterFactory("tests.browser.detectmultiplerootelements.componentwithnestedsinglerootelement", func() interface{} {
+	golivewire.RegisterFactory("tests.browser.detectmultiplerootelements.componentwithnestedsinglerootelement", func() golivewire.Component {
 		return &ComponentWithNestedSingleRootElement{}
 	})
 
-	golivewire.RegisterFactory("tests.browser.detectmultiplerootelements.componentwithsinglerootelement", func() interface{} {
+	golivewire.RegisterFactory("tests.browser.detectmultiplerootelements.componentwithsinglerootelement", func() golivewire.Component {
 		return &ComponentWithSingleRootElement{}
 	})
 }

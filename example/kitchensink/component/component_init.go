@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	golivewire.RegisterFactory("tests.browser.init.component", func() interface{} {
+	golivewire.RegisterFactory("tests.browser.init.component", func() golivewire.Component {
 		return &ComponentInit{}
 	})
 }

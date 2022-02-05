@@ -20,7 +20,7 @@ func (r factoryRegistry) register(name string, fn ComponentFactoryFunc) error {
 	if _, ok := comp.(Renderer); !ok {
 		return ErrNotRenderer
 	}
-	if _, ok := comp.(baseComponentSupport); !ok {
+	if _, ok := comp.(Component); !ok {
 		return ErrNotComponent
 	}
 
@@ -41,7 +41,7 @@ type factory struct {
 	name string
 }
 
-func (f factory) createInstance(ctx context.Context) (baseComponentSupport, error) {
+func (f factory) createInstance(ctx context.Context) (Component, error) {
 	comp := f.fn()
 
 	if req := httpRequestFromContext(ctx); req != nil {
@@ -52,10 +52,11 @@ func (f factory) createInstance(ctx context.Context) (baseComponentSupport, erro
 		}
 	}
 
-	baseComp := comp.(baseComponentSupport)
-	baseComp.getBaseComponent().name = f.name
-	baseComp.getBaseComponent().ctx = ctx
-	return baseComp, nil
+	base := comp.(Component).getBaseComponent()
+	base.name = f.name
+	base.ctx = ctx
+	base.component = comp
+	return comp.(Component), nil
 }
 
 // RegisterFactory register component factory. It's not thread-safe.

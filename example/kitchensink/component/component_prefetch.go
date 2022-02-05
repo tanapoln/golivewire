@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	golivewire.RegisterFactory("tests.browser.prefetch.component", func() interface{} {
+	golivewire.RegisterFactory("tests.browser.prefetch.component", func() golivewire.Component {
 		return &ComponentPrefetch{}
 	})
 }

@@ -46,7 +46,7 @@ func (h htmlDecoratorFunc) Decorate(ctx context.Context, node *html.Node, compon
 
 func livewireIdRenderer(ctx context.Context, node *html.Node, component interface{}) error {
 	var baseComp *BaseComponent
-	if v, ok := component.(baseComponentSupport); !ok {
+	if v, ok := component.(Component); !ok {
 		return ErrNotComponent
 	} else {
 		baseComp = v.getBaseComponent()
@@ -62,7 +62,7 @@ func livewireIdRenderer(ctx context.Context, node *html.Node, component interfac
 
 func livewireInitialDataRenderer(ctx context.Context, node *html.Node, component interface{}) error {
 	var baseComp *BaseComponent
-	if v, ok := component.(baseComponentSupport); !ok {
+	if v, ok := component.(Component); !ok {
 		return ErrNotComponent
 	} else {
 		baseComp = v.getBaseComponent()
@@ -100,7 +100,7 @@ func renderWithDecorators(ctx context.Context, obj interface{}, decorators ...HT
 	if _, ok := obj.(Renderer); !ok {
 		return "", ErrNotRenderer
 	}
-	if _, ok := obj.(baseComponentSupport); !ok {
+	if _, ok := obj.(Component); !ok {
 		return "", ErrNotComponent
 	}
 
@@ -151,7 +151,7 @@ func renderWithDecorators(ctx context.Context, obj interface{}, decorators ...HT
 
 	err = html.Render(buf, &html.Node{
 		Type: html.CommentNode,
-		Data: fmt.Sprintf("Livewire Component wire-end:%s", obj.(baseComponentSupport).getBaseComponent().ID()),
+		Data: fmt.Sprintf("Livewire Component wire-end:%s", obj.(Component).getBaseComponent().ID()),
 	})
 	if err != nil {
 		return "", err

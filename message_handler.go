@@ -12,7 +12,7 @@ var (
 )
 
 type messageHandler struct {
-	comp baseComponentSupport
+	comp Component
 	ref  reflect.Value
 	req  *messageRequest
 }
@@ -79,7 +79,7 @@ func (h *messageHandler) doSetField(field string, val interface{}) error {
 	return nil
 }
 
-func newMessageHandler(req *messageRequest, comp baseComponentSupport) *messageHandler {
+func newMessageHandler(req *messageRequest, comp Component) *messageHandler {
 	return &messageHandler{
 		comp: comp,
 		ref:  reflect.ValueOf(comp),
@@ -87,7 +87,7 @@ func newMessageHandler(req *messageRequest, comp baseComponentSupport) *messageH
 	}
 }
 
-func HandleComponentMessage(req *messageRequest, comp baseComponentSupport) error {
+func HandleComponentMessage(req *messageRequest, comp Component) error {
 	hnd := newMessageHandler(req, comp)
 	for _, upd := range req.Updates {
 		switch upd.Type {
