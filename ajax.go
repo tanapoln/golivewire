@@ -1,7 +1,6 @@
 package golivewire
 
 import (
-	"html/template"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -16,47 +15,24 @@ func NewAjaxHandler() http.Handler {
 	router := httprouter.New()
 
 	router.POST("/livewire/message/:componentName", wrapHandlerFunc(func(w http.ResponseWriter, r *http.Request, params httprouter.Params) (interface{}, error) {
-		name := params.ByName("componentName")
-		compFactory, ok := componentRegistry[name]
-		if !ok {
-			return nil, ErrNotFound.Message("component name is not found: " + name)
+		_, manager := newManagerCtx(r.Context(), r)
+		if err := manager.ProcessRequest(); err != nil {
+			return nil, err
 		}
 
-		comp, err := compFactory.createInstance(r.Context())
+		lifecycle, err := newLifecycleFromSubsequentRequest(manager)
 		if err != nil {
 			return nil, err
 		}
 
-		req := &Request{
-			ServerMemo: serverMemo{
-				Data: comp,
-			},
+		if err := lifecycle.renderToView(); err != nil {
+			return nil, err
 		}
-		if err := bindJSONRequest(r, req); err != nil {
-			return nil, ErrBadRequest.Err(err)
-		}
-		comp.getBaseComponent().id = req.Fingerprint.ID
-
-		err = HandleComponentMessage(req, comp)
-		if err != nil {
+		if err := lifecycle.toSubsequentResponse(); err != nil {
 			return nil, err
 		}
 
-		html, err := renderWithDecorators(r.Context(), comp, rendererPipeline...)
-		if err != nil {
-			return nil, err
-		}
-
-		resp := Response{
-			Effects: Effects{
-				Html:  template.HTML(html),
-				Dirty: []string{},
-			},
-			ServerMemo: serverMemo{
-				Data: comp,
-			},
-		}
-		return resp, nil
+		return lifecycle.response, nil
 	}))
 
 	var hnd http.Handler = router

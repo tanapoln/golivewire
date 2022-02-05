@@ -8,11 +8,12 @@ import (
 )
 
 var (
-	componentRegistry  = factoryRegistry{}
-	ErrNotComponent    = errors.New("object must embeded golivewire.BaseComponent")
-	ErrNoNameDefined   = errors.New("component must have name defined, cannot be empty")
-	ErrNotRenderer     = errors.New("object must implement golivewire.Renderer")
-	ErrCreateComponent = errors.New("cannot create component, component is not valid")
+	componentRegistry           = factoryRegistry{}
+	ErrNotComponent             = errors.New("object must embeded golivewire.BaseComponent")
+	ErrNoNameDefined            = errors.New("component must have name defined, cannot be empty")
+	ErrNotRenderer              = errors.New("object must implement golivewire.Renderer")
+	ErrCreateComponent          = errors.New("cannot create component, component is not valid")
+	ErrCreateComponentInvalidID = errors.New("invalid component id")
 )
 
 type factoryRegistry map[string]factory
@@ -45,15 +46,22 @@ func (f factory) valid() bool {
 }
 
 func (f factory) createInstance(ctx context.Context) (Component, error) {
+	return f.createInstanceWithID(ctx, xid.New().String())
+}
+
+func (f factory) createInstanceWithID(ctx context.Context, id string) (Component, error) {
 	if !f.valid() {
 		return nil, ErrCreateComponent
+	}
+	if id == "" {
+		return nil, ErrCreateComponentInvalidID
 	}
 
 	comp := f.fn()
 
 	manager := managerFromCtx(ctx)
 	base := comp.getBaseComponent()
-	base.id = xid.New().String()
+	base.id = id
 	base.name = f.name
 	base.ctx = ctx
 	base.component = comp

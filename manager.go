@@ -7,13 +7,13 @@ import (
 
 type managerCtxKey struct{}
 
-func newManagerCtx(ctx context.Context, req *http.Request) context.Context {
+func newManagerCtx(ctx context.Context, req *http.Request) (context.Context, *livewireManager) {
 	mgr := &livewireManager{}
 	newctx := context.WithValue(ctx, managerCtxKey{}, mgr)
 	mgr.ctx = newctx
-	mgr.req = req
+	mgr.httpReq = req
 
-	return newctx
+	return newctx, mgr
 }
 
 func managerFromCtx(ctx context.Context) *livewireManager {
@@ -21,14 +21,31 @@ func managerFromCtx(ctx context.Context) *livewireManager {
 }
 
 type livewireManager struct {
-	req *http.Request
-	ctx context.Context
+	httpReq *http.Request
+	ctx     context.Context
+	req     Request
+}
+
+func (l *livewireManager) ProcessRequest() error {
+	return bindJSONRequest(l.httpReq, &l.req)
 }
 
 func (l *livewireManager) OriginalPath() string {
-	return l.req.URL.Path
+	return l.httpReq.URL.Path
 }
 
 func (l *livewireManager) OriginalMethod() string {
-	return l.req.Method
+	return l.httpReq.Method
+}
+
+func (l *livewireManager) GetComponentInstance(name string, id string) (Component, error) {
+	compFactory, ok := componentRegistry[name]
+	if !ok {
+		return nil, ErrNotFound.Message("component name is not found: " + name)
+	}
+	return compFactory.createInstanceWithID(l.ctx, id)
+}
+
+func (l *livewireManager) IsLivewireRequest() bool {
+	return l.httpReq.Header.Get("x-livewire") != ""
 }
