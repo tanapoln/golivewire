@@ -13,11 +13,9 @@ var (
 
 func init() {
 	golivewire.RegisterFactory("counter", func() interface{} {
-		return &Counter{
-			BaseComponent: golivewire.BaseComponent{
-				Listeners: []string{"test"},
-			},
-		}
+		c := &Counter{}
+		c.WithListeners("test")
+		return c
 	})
 }
 

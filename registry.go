@@ -53,7 +53,7 @@ func (f factory) createInstance(ctx context.Context) (baseComponentSupport, erro
 	}
 
 	baseComp := comp.(baseComponentSupport)
-	baseComp.getBaseComponent().Name = f.name
+	baseComp.getBaseComponent().name = f.name
 	baseComp.getBaseComponent().ctx = ctx
 	return baseComp, nil
 }

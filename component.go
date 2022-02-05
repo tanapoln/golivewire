@@ -8,16 +8,24 @@ import (
 
 type BaseComponent struct {
 	id        string
-	Name      string   `json:"-"`
-	Listeners []string `json:"-"`
+	name      string
+	listeners []string
 	ctx       context.Context
 }
 
-func (b *BaseComponent) GetID() string {
+func (b *BaseComponent) ID() string {
 	if b.id == "" {
 		b.id = xid.New().String()
 	}
 	return b.id
+}
+
+func (c *BaseComponent) Name() string {
+	return c.name
+}
+
+func (b *BaseComponent) WithListeners(listeners ...string) {
+	b.listeners = listeners
 }
 
 func (b *BaseComponent) getContext() context.Context {
