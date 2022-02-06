@@ -13,6 +13,16 @@ type OnBoot interface {
 	Boot() error
 }
 
+type LifecycleHook interface {
+	Execute(ctx context.Context, component Component, response *Response) error
+}
+
+type LifecycleHookFunc func(ctx context.Context, component Component, response *Response) error
+
+func (f LifecycleHookFunc) Execute(ctx context.Context, component Component, response *Response) error {
+	return f(ctx, component, response)
+}
+
 type ComponentFactoryFunc func() Component
 
 type Request struct {

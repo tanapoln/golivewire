@@ -59,13 +59,11 @@ func (f factory) createInstanceWithID(ctx context.Context, id string) (Component
 
 	comp := f.fn()
 
-	manager := managerFromCtx(ctx)
 	base := comp.getBaseComponent()
 	base.id = id
 	base.name = f.name
 	base.ctx = ctx
 	base.component = comp
-	base.manager = manager
 	return comp, nil
 }
 

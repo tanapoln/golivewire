@@ -31,8 +31,8 @@ func newLifecycleFromInitialComponent(manager *livewireManager, componentName st
 	base := comp.getBaseComponent()
 	l.request.Fingerprint.ID = base.ID()
 	l.request.Fingerprint.Name = base.Name()
-	l.request.Fingerprint.Path = base.manager.OriginalPath()
-	l.request.Fingerprint.Method = base.manager.OriginalMethod()
+	l.request.Fingerprint.Path = manager.OriginalPath()
+	l.request.Fingerprint.Method = manager.OriginalMethod()
 
 	return l, nil
 }
@@ -44,8 +44,16 @@ type lifecycleManager struct {
 }
 
 func (l *lifecycleManager) Boot() error {
+	if err := hookDispatch(EventComponentBoot, l); err != nil {
+		return err
+	}
+
 	if v, ok := l.component.(OnBoot); ok {
 		return v.Boot()
+	}
+
+	if err := hookDispatch(EventComponentBooted, l); err != nil {
+		return err
 	}
 
 	return nil
@@ -61,7 +69,7 @@ func (l *lifecycleManager) Hydrate() error {
 		return err
 	}
 
-	return nil
+	return hookDispatch(EventComponentHydrate, l)
 }
 
 func (l *lifecycleManager) bindDataToComponent() error {
@@ -82,14 +90,21 @@ func (l *lifecycleManager) bindDataToComponent() error {
 }
 
 func (l *lifecycleManager) InitialHydrate() error {
-	if err := l.component.getBaseComponent().bindQuery(); err != nil {
+	if err := hookDispatch(EventComponentHydrateInitial, l); err != nil {
 		return err
 	}
+
 	return nil
 }
 
 func (l *lifecycleManager) Month() error {
-	//TODO Sharp: bind params to component
+	if err := hookDispatch(EventComponentMount, l); err != nil {
+		return err
+	}
+
+	if err := hookDispatch(EventComponentBooted, l); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -123,13 +138,13 @@ func (l *lifecycleManager) ToInitialResponse() error {
 	comp := l.component.getBaseComponent()
 	view := comp.preRenderView
 
-	view.AddWireTag("id", comp.id)
-
 	initialData, err := json.Marshal(l.response)
 	if err != nil {
 		return err
 	}
 	view.AddWireTag("initial-data", string(initialData))
+
+	view.AddWireTag("id", comp.id)
 
 	html, err := view.RenderSafe()
 	if err != nil {
@@ -137,6 +152,10 @@ func (l *lifecycleManager) ToInitialResponse() error {
 	}
 
 	l.response.Effects.Html = html
+
+	if err := hookDispatch(EventMounted, l); err != nil {
+		return err
+	}
 	return nil
 }
 
