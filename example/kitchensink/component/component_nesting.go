@@ -76,14 +76,14 @@ type ComponentNestingRenderContextComponent struct {
 func (c *ComponentNestingRenderContextComponent) Render(ctx context.Context) (string, error) {
 	return RenderTemplate(c, `
 <div>
-    <x-blade-component dusk="output.blade-component1" property="one" />
-    <x-blade-component dusk="output.blade-component2" property="two" />
+    <div dusk="output.blade-component1" >Blade 1</div>
+    <div dusk="output.blade-component2" >Blade 2</div>
 
     <div>
         {{livewire "tests.browser.nesting.nestedcomponent" .NestedArg .}}
     </div>
 
-    <x-blade-component dusk="output.blade-component3" property="three" />
+	<div dusk="output.blade-component3" >Blade 3</div>
 </div>
 `)
 }
