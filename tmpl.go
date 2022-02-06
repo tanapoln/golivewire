@@ -41,12 +41,10 @@ func LivewireTemplateFunc(args ...interface{}) (template.HTML, error) {
 		return "", errors.New("invalid context, no golivewire manager found")
 	}
 
-	component, err := manager.NewComponentInstance(componentName)
+	lifecycle, err := newLifecycleFromInitialComponent(manager, componentName)
 	if err != nil {
 		return "", err
 	}
-
-	lifecycle := newLifecycleFromInitialComponent(component)
 	if err := lifecycle.InitialHydrate(); err != nil {
 		return "", err
 	}

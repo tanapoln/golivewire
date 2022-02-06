@@ -19,7 +19,12 @@ func newLifecycleFromSubsequentRequest(manager *livewireManager) (*lifecycleMana
 	return l, nil
 }
 
-func newLifecycleFromInitialComponent(comp Component) *lifecycleManager {
+func newLifecycleFromInitialComponent(manager *livewireManager, componentName string) (*lifecycleManager, error) {
+	comp, err := manager.NewComponentInstance(componentName)
+	if err != nil {
+		return nil, err
+	}
+
 	l := &lifecycleManager{}
 	l.component = comp
 
@@ -29,7 +34,7 @@ func newLifecycleFromInitialComponent(comp Component) *lifecycleManager {
 	l.request.Fingerprint.Path = base.manager.OriginalPath()
 	l.request.Fingerprint.Method = base.manager.OriginalMethod()
 
-	return l
+	return l, nil
 }
 
 type lifecycleManager struct {
