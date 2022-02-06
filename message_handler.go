@@ -79,6 +79,15 @@ func (h *messageHandler) doSetField(field string, val interface{}) error {
 	return nil
 }
 
+func (h *messageHandler) OnSyncInput(upd updateAction) error {
+	fieldName := upd.Payload.Name
+	val := upd.Payload.Value
+
+	fieldName = coalesceMethodName(fieldName)
+	return h.doSetField(fieldName, val)
+}
+
+
 func newMessageHandler(req *Request, comp Component) *messageHandler {
 	return &messageHandler{
 		comp: comp,

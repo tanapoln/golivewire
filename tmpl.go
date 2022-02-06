@@ -48,7 +48,7 @@ func LivewireTemplateFunc(args ...interface{}) (template.HTML, error) {
 	if err := lifecycle.InitialHydrate(); err != nil {
 		return "", err
 	}
-	if err := lifecycle.Month(); err != nil {
+	if err := lifecycle.Mount(); err != nil {
 		return "", err
 	}
 	if err := lifecycle.RenderToView(); err != nil {

@@ -23,7 +23,7 @@ func wrapHandlerFunc(fn customHandlerFunc) httprouter.Handle {
 			} else {
 				w.WriteHeader(500)
 				_ = writeJsonBody(w, H{
-					"error": v.Error(),
+					"error": err.Error(),
 				})
 			}
 

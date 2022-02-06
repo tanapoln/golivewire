@@ -2,12 +2,14 @@ package golivewire
 
 import (
 	"encoding/json"
+
 	"github.com/tanapoln/golivewire/lib/mapstructure"
 	"golang.org/x/net/html"
 )
 
 func newLifecycleFromSubsequentRequest(manager *livewireManager) (*lifecycleManager, error) {
 	l := &lifecycleManager{}
+	l.manager = manager
 	l.request = manager.req
 
 	comp, err := manager.GetComponentInstance(l.request.Fingerprint.Name, l.request.Fingerprint.ID)
@@ -26,6 +28,7 @@ func newLifecycleFromInitialComponent(manager *livewireManager, componentName st
 	}
 
 	l := &lifecycleManager{}
+	l.manager = manager
 	l.component = comp
 
 	base := comp.getBaseComponent()
@@ -38,13 +41,14 @@ func newLifecycleFromInitialComponent(manager *livewireManager, componentName st
 }
 
 type lifecycleManager struct {
+	manager   *livewireManager
 	request   Request
 	component Component
 	response  Response
 }
 
 func (l *lifecycleManager) Boot() error {
-	if err := hookDispatch(EventComponentBoot, l); err != nil {
+	if err := l.manager.HookDispatch(EventComponentBoot, l); err != nil {
 		return err
 	}
 
@@ -52,7 +56,7 @@ func (l *lifecycleManager) Boot() error {
 		return v.Boot()
 	}
 
-	if err := hookDispatch(EventComponentBooted, l); err != nil {
+	if err := l.manager.HookDispatch(EventComponentBooted, l); err != nil {
 		return err
 	}
 
@@ -69,7 +73,7 @@ func (l *lifecycleManager) Hydrate() error {
 		return err
 	}
 
-	return hookDispatch(EventComponentHydrate, l)
+	return l.manager.HookDispatch(EventComponentHydrate, l)
 }
 
 func (l *lifecycleManager) bindDataToComponent() error {
@@ -90,19 +94,19 @@ func (l *lifecycleManager) bindDataToComponent() error {
 }
 
 func (l *lifecycleManager) InitialHydrate() error {
-	if err := hookDispatch(EventComponentHydrateInitial, l); err != nil {
+	if err := l.manager.HookDispatch(EventComponentHydrateInitial, l); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (l *lifecycleManager) Month() error {
-	if err := hookDispatch(EventComponentMount, l); err != nil {
+func (l *lifecycleManager) Mount() error {
+	if err := l.manager.HookDispatch(EventComponentMount, l); err != nil {
 		return err
 	}
 
-	if err := hookDispatch(EventComponentBooted, l); err != nil {
+	if err := l.manager.HookDispatch(EventComponentBooted, l); err != nil {
 		return err
 	}
 	return nil
@@ -120,6 +124,12 @@ func (l *lifecycleManager) RenderToView() error {
 func (l *lifecycleManager) Dehydrate() error {
 	l.copyRequestToResponse()
 	l.response.ServerMemo.Data = l.component
+	if err := l.manager.HookDispatch(EventComponentDehydrate, l); err != nil {
+		return err
+	}
+	if err := l.manager.HookDispatch(EventComponentDehydrateSubsequent, l); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -130,6 +140,13 @@ func (l *lifecycleManager) InitialDehydrate() error {
 		Type: html.CommentNode,
 		Data: "Livewire Component wire-end:" + l.component.getBaseComponent().ID(),
 	})
+
+	if err := l.manager.HookDispatch(EventComponentDehydrate, l); err != nil {
+		return err
+	}
+	if err := l.manager.HookDispatch(EventComponentDehydrateInitial, l); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -153,7 +170,7 @@ func (l *lifecycleManager) ToInitialResponse() error {
 
 	l.response.Effects.Html = html
 
-	if err := hookDispatch(EventMounted, l); err != nil {
+	if err := l.manager.HookDispatch(EventMounted, l); err != nil {
 		return err
 	}
 	return nil
@@ -186,6 +203,11 @@ func (l *lifecycleManager) handleMessage() error {
 		switch upd.Type {
 		case "callMethod":
 			err := hnd.OnCallMethod(upd)
+			if err != nil {
+				return err
+			}
+		case "syncInput":
+			err := hnd.OnSyncInput(upd)
 			if err != nil {
 				return err
 			}

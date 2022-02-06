@@ -14,8 +14,10 @@ var (
 func NewAjaxHandler() http.Handler {
 	router := httprouter.New()
 
-	router.POST("/livewire/message/:componentName", wrapHandlerFunc(func(w http.ResponseWriter, r *http.Request, params httprouter.Params) (interface{}, error) {
-		_, manager := newManagerCtx(r.Context(), r)
+	router.POST("/livewire/message/:componentName", ajaxMiddleware(wrapHandlerFunc(func(w http.ResponseWriter, r *http.Request, params httprouter.Params) (interface{}, error) {
+		w.Header().Set("cache-control", "max-age=0, must-revalidate, no-cache, no-store, private")
+
+		manager := managerFromCtx(r.Context())
 		if err := manager.ProcessRequest(); err != nil {
 			return nil, err
 		}
@@ -38,7 +40,7 @@ func NewAjaxHandler() http.Handler {
 		}
 
 		return lifecycle.response, nil
-	}))
+	})))
 
 	var hnd http.Handler = router
 	if CORSOptions != nil {

@@ -3,6 +3,7 @@ package golivewire
 import (
 	"context"
 	"html/template"
+	"net/url"
 )
 
 type Renderer interface {
@@ -13,14 +14,18 @@ type OnBoot interface {
 	Boot() error
 }
 
-type LifecycleHook interface {
-	Execute(ctx context.Context, component Component, response *Response) error
+type Querystringer interface {
+	Querystring() url.Values
 }
 
-type LifecycleHookFunc func(ctx context.Context, component Component, response *Response) error
+type LifecycleHook interface {
+	Execute(ctx context.Context, component Component, request *Request, response *Response) error
+}
 
-func (f LifecycleHookFunc) Execute(ctx context.Context, component Component, response *Response) error {
-	return f(ctx, component, response)
+type LifecycleHookFunc func(ctx context.Context, component Component, request *Request, response *Response) error
+
+func (f LifecycleHookFunc) Execute(ctx context.Context, component Component, request *Request, response *Response) error {
+	return f(ctx, component, request, response)
 }
 
 type ComponentFactoryFunc func() Component
@@ -76,24 +81,24 @@ type Effects struct {
 }
 
 type updateAction struct {
-	//Possible: callMethod, syncInput, fireEvent
+	// Possible: callMethod, syncInput, fireEvent
 	Type    string              `json:"type,omitempty"`
 	Payload updateActionPayload `json:"payload,omitempty"`
 }
 
 type updateActionPayload struct {
-	//for callMethod and fireEvent
+	// for callMethod and fireEvent
 	ID string `json:"id"`
-	//for callMethod and fireEvent
+	// for callMethod and fireEvent
 	Params []interface{} `json:"params"`
 
-	//for callMethod. common method: $sync, $set, $toggle, $refresh. see: \Livewire\ComponentConcerns\HandlesActions::callMethod
+	// for callMethod. common method: $sync, $set, $toggle, $refresh. see: \Livewire\ComponentConcerns\HandlesActions::callMethod
 	Method string `json:"method"`
 
-	//for syncInput
+	// for syncInput
 	Name  string      `json:"name"`
 	Value interface{} `json:"value"`
 
-	//for fireEvent
+	// for fireEvent
 	Event string `json:"event"`
 }

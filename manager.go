@@ -12,6 +12,9 @@ func newManagerCtx(ctx context.Context, req *http.Request) (context.Context, *li
 	newctx := context.WithValue(ctx, managerCtxKey{}, mgr)
 	mgr.ctx = newctx
 	mgr.httpReq = req
+	mgr.hooks = make(map[EventName][]LifecycleHook)
+
+	mgr.boot()
 
 	return newctx, mgr
 }
@@ -28,6 +31,31 @@ type livewireManager struct {
 	httpReq *http.Request
 	ctx     context.Context
 	req     Request
+
+	hooks map[EventName][]LifecycleHook
+}
+
+func (l *livewireManager) boot() {
+	l.HookRegister(EventComponentHydrateInitial, LifecycleHookFunc(hookQueryParamHydration))
+
+	hookUrlQuerySupport := newHookUrlQuerySupport()
+	l.HookRegister(EventComponentDehydrateInitial, LifecycleHookFunc(hookUrlQuerySupport.dehydrateInitial))
+	l.HookRegister(EventComponentDehydrateSubsequent, LifecycleHookFunc(hookUrlQuerySupport.dehydrateSubsequent))
+}
+
+func (l *livewireManager) HookRegister(name EventName, fn LifecycleHook) {
+	l.hooks[name] = append(l.hooks[name], fn)
+}
+
+func (l *livewireManager) HookDispatch(name EventName, lm *lifecycleManager) error {
+	comp := lm.component
+	base := comp.getBaseComponent()
+	for _, fn := range l.hooks[name] {
+		if err := fn.Execute(base.ctx, comp, &lm.request, &lm.response); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (l *livewireManager) ProcessRequest() error {
@@ -40,6 +68,10 @@ func (l *livewireManager) OriginalPath() string {
 
 func (l *livewireManager) OriginalMethod() string {
 	return l.httpReq.Method
+}
+
+func (l *livewireManager) OriginalBaseURL() string {
+	return "http://localhost:8081"
 }
 
 func (l *livewireManager) Queryparams() map[string]interface{} {
