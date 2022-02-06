@@ -9,6 +9,10 @@ type Renderer interface {
 	Render(ctx context.Context) (string, error)
 }
 
+type OnBoot interface {
+	Boot() error
+}
+
 type ComponentFactoryFunc func() Component
 
 type Request struct {

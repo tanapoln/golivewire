@@ -27,6 +27,10 @@ func (c *BaseComponent) WithListeners(listeners ...string) {
 	c.listeners = listeners
 }
 
+func (c *BaseComponent) Context() context.Context {
+	return c.ctx
+}
+
 func (c *BaseComponent) getBaseComponent() *BaseComponent {
 	return c
 }

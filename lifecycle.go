@@ -2,7 +2,7 @@ package golivewire
 
 import (
 	"encoding/json"
-	"github.com/mitchellh/mapstructure"
+	"github.com/tanapoln/golivewire/lib/mapstructure"
 	"golang.org/x/net/html"
 )
 
@@ -39,6 +39,10 @@ type lifecycleManager struct {
 }
 
 func (l *lifecycleManager) Boot() error {
+	if v, ok := l.component.(OnBoot); ok {
+		return v.Boot()
+	}
+
 	return nil
 }
 
@@ -58,8 +62,9 @@ func (l *lifecycleManager) Hydrate() error {
 func (l *lifecycleManager) bindDataToComponent() error {
 	if data, ok := l.request.ServerMemo.Data.(map[string]interface{}); ok {
 		decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-			TagName: "json",
-			Result:  l.component,
+			TagName:          "json",
+			Result:           l.component,
+			WeaklyTypedInput: true,
 		})
 		if err != nil {
 			return err
