@@ -12,6 +12,7 @@ type BaseComponent struct {
 	component        interface{}
 	preRenderView    *htmlView
 	shouldSkipRender bool
+	children         []Component
 }
 
 func (c *BaseComponent) ID() string {
@@ -36,6 +37,10 @@ func (c *BaseComponent) getBaseComponent() *BaseComponent {
 
 func (c *BaseComponent) skipRender() {
 	c.shouldSkipRender = true
+}
+
+func (c *BaseComponent) addChild(comp Component) {
+	c.children = append(c.children, comp)
 }
 
 func (c *BaseComponent) renderToView() (*htmlView, error) {

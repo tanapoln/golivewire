@@ -51,12 +51,17 @@ type fingerprint struct {
 }
 
 type serverMemo struct {
-	Data     interface{}   `json:"data"`
-	HtmlHash string        `json:"htmlHash,omitempty"`
-	Checksum string        `json:"checksum,omitempty"`
-	Children []interface{} `json:"children,omitempty"`
-	Errors   []interface{} `json:"errors,omitempty"`
-	DataMeta dataMeta      `json:"dataMeta,omitempty"`
+	Data     interface{}      `json:"data"`
+	HtmlHash string           `json:"htmlHash,omitempty"`
+	Checksum string           `json:"checksum,omitempty"`
+	Children []childComponent `json:"children,omitempty"`
+	Errors   []interface{}    `json:"errors,omitempty"`
+	DataMeta dataMeta         `json:"dataMeta,omitempty"`
+}
+
+type childComponent struct {
+	ID  string `json:"id"`
+	Tag string `json:"tag"`
 }
 
 type dataMeta struct {

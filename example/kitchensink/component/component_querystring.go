@@ -3,6 +3,7 @@ package component
 import (
 	"context"
 	"net/url"
+	"strconv"
 
 	"github.com/tanapoln/golivewire"
 )
@@ -39,7 +40,7 @@ type ComponentQueryString struct {
 	Bob []string               `json:"bob" query:"bob"`
 	Qux map[string]interface{} `json:"qux" query:"qux"`
 
-	ShowNestedComponent bool `json:"showNestedComponent"`
+	ShowNestedComponent bool `json:"showNestedComponent" query:"showNestedComponent"`
 }
 
 func (q *ComponentQueryString) Querystring() url.Values {
@@ -49,6 +50,8 @@ func (q *ComponentQueryString) Querystring() url.Values {
 	for _, s := range q.Bob {
 		v.Add("bob", s)
 	}
+	v.Set("showNestedComponent", strconv.FormatBool(q.ShowNestedComponent))
+
 	return v
 }
 

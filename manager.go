@@ -14,7 +14,9 @@ func newManagerCtx(ctx context.Context, req *http.Request) (context.Context, *li
 	mgr.httpReq = req
 	mgr.hooks = make(map[EventName][]LifecycleHook)
 
-	mgr.boot()
+	for _, fn := range booters {
+		fn(mgr)
+	}
 
 	return newctx, mgr
 }
@@ -27,20 +29,20 @@ func managerFromCtx(ctx context.Context) *livewireManager {
 	return v.(*livewireManager)
 }
 
+type livewireManagerBootFunc func(manager *livewireManager)
+
+var booters []livewireManagerBootFunc
+
+func registerBooter(fn livewireManagerBootFunc) {
+	booters = append(booters, fn)
+}
+
 type livewireManager struct {
 	httpReq *http.Request
 	ctx     context.Context
 	req     Request
 
 	hooks map[EventName][]LifecycleHook
-}
-
-func (l *livewireManager) boot() {
-	l.HookRegister(EventComponentHydrateInitial, LifecycleHookFunc(hookQueryParamHydration))
-
-	hookUrlQuerySupport := newHookUrlQuerySupport()
-	l.HookRegister(EventComponentDehydrateInitial, LifecycleHookFunc(hookUrlQuerySupport.dehydrateInitial))
-	l.HookRegister(EventComponentDehydrateSubsequent, LifecycleHookFunc(hookUrlQuerySupport.dehydrateSubsequent))
 }
 
 func (l *livewireManager) HookRegister(name EventName, fn LifecycleHook) {

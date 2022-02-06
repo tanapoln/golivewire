@@ -33,6 +33,35 @@ const (
 	EventPropertyDehydrate
 )
 
+func init() {
+	registerBooter(func(manager *livewireManager) {
+		manager.HookRegister(EventComponentHydrateInitial, LifecycleHookFunc(hookQueryParamHydration))
+	})
+
+	registerBooter(func(manager *livewireManager) {
+		hookUrlQuerySupport := newHookUrlQuerySupport()
+		manager.HookRegister(EventComponentDehydrateInitial, LifecycleHookFunc(hookUrlQuerySupport.dehydrateInitial))
+		manager.HookRegister(EventComponentDehydrateSubsequent, LifecycleHookFunc(hookUrlQuerySupport.dehydrateSubsequent))
+	})
+
+	registerBooter(func(manager *livewireManager) {
+		manager.HookRegister(EventComponentDehydrate, LifecycleHookFunc(func(ctx context.Context, component Component, request *Request, response *Response) error {
+			for _, child := range component.getBaseComponent().children {
+				response.ServerMemo.Children = append(response.ServerMemo.Children, childComponent{
+					ID:  child.getBaseComponent().ID(),
+					Tag: child.getBaseComponent().preRenderView.firstNode.Data,
+				})
+			}
+
+			return nil
+		}))
+
+		manager.HookRegister(EventComponentHydrateSubsequent, LifecycleHookFunc(func(ctx context.Context, component Component, request *Request, response *Response) error {
+			return nil
+		}))
+	})
+}
+
 func hookQueryParamHydration(ctx context.Context, component Component, request *Request, response *Response) error {
 	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 		TagName:          "query",
