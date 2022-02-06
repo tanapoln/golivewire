@@ -101,9 +101,23 @@ func (l *lifecycleManager) InitialHydrate() error {
 	return nil
 }
 
-func (l *lifecycleManager) Mount() error {
+func (l *lifecycleManager) Mount(param map[string]interface{}) error {
 	if err := l.manager.HookDispatch(EventComponentMount, l); err != nil {
 		return err
+	}
+
+	if param != nil {
+		decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+			TagName:          "json",
+			Result:           l.component,
+			WeaklyTypedInput: true,
+		})
+		if err != nil {
+			return err
+		}
+		if err := decoder.Decode(param); err != nil {
+			return err
+		}
 	}
 
 	if err := l.manager.HookDispatch(EventComponentBooted, l); err != nil {

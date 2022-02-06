@@ -23,15 +23,17 @@ func LivewireTemplateFunc(args ...interface{}) (template.HTML, error) {
 
 	var ctx context.Context
 	var parentComponent Component
+	var componentParams map[string]interface{}
 	for _, arg := range args {
 		if v, ok := arg.(context.Context); ok {
 			ctx = v
-			break
 		}
 		if v, ok := arg.(Component); ok {
 			parentComponent = v
 			ctx = v.getBaseComponent().ctx
-			break
+		}
+		if v, ok := arg.(map[string]interface{}); ok {
+			componentParams = v
 		}
 	}
 	if ctx == nil {
@@ -54,7 +56,7 @@ func LivewireTemplateFunc(args ...interface{}) (template.HTML, error) {
 	if err := lifecycle.InitialHydrate(); err != nil {
 		return "", err
 	}
-	if err := lifecycle.Mount(); err != nil {
+	if err := lifecycle.Mount(componentParams); err != nil {
 		return "", err
 	}
 	if err := lifecycle.RenderToView(); err != nil {

@@ -38,6 +38,17 @@ func (h *messageHandler) OnCallMethod(upd updateAction) error {
 			field = coalesceMethodName(field)
 			return h.doSetField(field, params[1])
 		}
+	case "$toggle":
+		params := upd.Payload.Params
+		if len(params) != 1 {
+			return ErrBadRequest.Message("invalid number of $toggle parameters, expect 1 parameter")
+		}
+		if field, ok := params[0].(string); !ok {
+			return ErrBadRequest.Message("invalid $set parameters, expect first param to be string")
+		} else {
+			field = coalesceMethodName(field)
+			return h.doToggleField(field)
+		}
 	default:
 		method = h.ref.MethodByName(methodName)
 		if !method.IsValid() {
@@ -79,6 +90,18 @@ func (h *messageHandler) doSetField(field string, val interface{}) error {
 	return nil
 }
 
+func (h *messageHandler) doToggleField(field string) error {
+	fieldRef := h.ref.Elem().FieldByName(field)
+	if !fieldRef.IsValid() {
+		return ErrBadRequest.Message("invalid field name: " + field)
+	}
+	if !fieldRef.CanSet() {
+		return ErrBadRequest.Message("invalid field cannot be set: " + field)
+	}
+	fieldRef.Set(reflect.ValueOf(!fieldRef.Bool()))
+	return nil
+}
+
 func (h *messageHandler) OnSyncInput(upd updateAction) error {
 	fieldName := upd.Payload.Name
 	val := upd.Payload.Value
@@ -86,7 +109,6 @@ func (h *messageHandler) OnSyncInput(upd updateAction) error {
 	fieldName = coalesceMethodName(fieldName)
 	return h.doSetField(fieldName, val)
 }
-
 
 func newMessageHandler(req *Request, comp Component) *messageHandler {
 	return &messageHandler{
