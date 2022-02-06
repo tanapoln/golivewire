@@ -24,7 +24,8 @@ func init() {
 type Counter struct {
 	golivewire.BaseComponent
 
-	Count int `json:"count" query:"count"`
+	Banned bool `json:"banned"`
+	Count  int  `json:"count" query:"count"`
 }
 
 func (c *Counter) Render(ctx context.Context) (string, error) {
@@ -32,15 +33,16 @@ func (c *Counter) Render(ctx context.Context) (string, error) {
 	return RenderTemplate(c, `
 	<div>
 		Count: {{.Count}}
+		{{if not .Banned}}
 		<button wire:click="Incr">incr</button>
+		{{else}}
+		<button>Banned, disabled</button>
+		{{end}}
 	</div>`)
-}
-
-func (c *Counter) Refresh() error {
-	return nil
 }
 
 func (c *Counter) Incr() error {
 	c.Count++
+	c.Banned = true
 	return nil
 }

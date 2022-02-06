@@ -3,6 +3,8 @@ package golivewire
 import (
 	"context"
 	"net/http"
+
+	"github.com/julienschmidt/httprouter"
 )
 
 type httpRequestContext struct{}
@@ -28,5 +30,12 @@ func httpRequestFromContext(ctx context.Context) *http.Request {
 		return req
 	} else {
 		return nil
+	}
+}
+
+func ajaxMiddleware(handle httprouter.Handle) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		r = WithRequestContext(r)
+		handle(w, r, p)
 	}
 }

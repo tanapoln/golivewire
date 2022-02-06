@@ -74,7 +74,10 @@ func main() {
 
 		fmt.Printf("Rendering dusk component: %s\n", componentName)
 
-		c.HTML(200, "livewire-dusk-component.tmpl", componentName)
+		c.HTML(200, "livewire-dusk-component.tmpl", map[string]interface{}{
+			"ComponentName": componentName,
+			"Context":       c.Request.Context(),
+		})
 	})
 
 	srv.Use(gin.WrapH(golivewire.NewAjaxHandler()))

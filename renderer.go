@@ -3,9 +3,11 @@ package golivewire
 import (
 	"bytes"
 	"context"
+	"encoding/base32"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"hash/crc32"
 	"strings"
 	"sync"
 
@@ -28,7 +30,10 @@ var (
 )
 
 func init() {
-	rendererPipeline = append(rendererPipeline, htmlDecoratorFunc(livewireIdRenderer))
+	rendererPipeline = append(rendererPipeline,
+		htmlDecoratorFunc(livewireIdRenderer),
+		htmlDecoratorFunc(livewireQuerystring),
+	)
 
 	initialRendererPipeline = append(initialRendererPipeline, rendererPipeline...)
 	initialRendererPipeline = append(initialRendererPipeline, htmlDecoratorFunc(livewireInitialDataRenderer))
@@ -42,6 +47,26 @@ type htmlDecoratorFunc func(node *html.Node, component interface{}) error
 
 func (h htmlDecoratorFunc) Decorate(node *html.Node, component interface{}) error {
 	return h(node, component)
+}
+
+func livewireQuerystring(node *html.Node, obj interface{}) error {
+	comp, ok := obj.(baseComponentSupport)
+	if !ok {
+		return ErrNotComponent
+	}
+
+	qs := qsStoreFromCtx(comp.getBaseComponent().getContext())
+	if qs == nil {
+		return ErrInvalidContext
+	}
+
+	q, err := unbindQuery(comp)
+	if err != nil {
+		return err
+	}
+
+	qs.Merge(q)
+	return nil
 }
 
 func livewireIdRenderer(node *html.Node, component interface{}) error {
@@ -60,24 +85,39 @@ func livewireIdRenderer(node *html.Node, component interface{}) error {
 	return nil
 }
 
-func livewireInitialDataRenderer(node *html.Node, component interface{}) error {
+func livewireInitialDataRenderer(node *html.Node, obj interface{}) error {
+	var component baseComponentSupport
 	var baseComp *BaseComponent
-	if v, ok := component.(baseComponentSupport); !ok {
+	if v, ok := obj.(baseComponentSupport); !ok {
 		return ErrNotComponent
 	} else {
+		component = v
 		baseComp = v.getBaseComponent()
 	}
 
+	url, err := renderMessageResponsePath(component, nil)
+	if err != nil {
+		return err
+	}
+
+	htmlHash, _ := crc32HTML(node)
+
 	initData := componentData{
 		Fingerprint: fingerprint{
-			ID:   baseComp.GetID(),
-			Name: baseComp.Name,
+			ID:     baseComp.GetID(),
+			Name:   baseComp.name,
+			Path:   url.EscapedPath(),
+			Method: "GET",
+			Locale: "en",
 		},
 		Effects: componentEffects{
 			Listeners: baseComp.Listeners,
+			Path:      url.String(),
 		},
 		ServerMemo: serverMemo{
-			Data: component,
+			Checksum: "",
+			Data:     component,
+			HTMLHash: htmlHash,
 		},
 	}
 
@@ -187,4 +227,29 @@ func getAllHTMLChildNodeFirstMatch(node *html.Node, pred func(n *html.Node) bool
 		}
 	}
 	return nodes
+}
+
+func crc32HTML(n *html.Node) (string, error) {
+	buf := bufPool.Get().(*bytes.Buffer)
+	buf.Reset()
+	defer func() {
+		bufPool.Put(buf)
+	}()
+
+	err := html.Render(buf, n)
+	if err != nil {
+		return "", err
+	}
+
+	return crc32Hash(buf.String())
+}
+
+func crc32Hash(str string) (string, error) {
+	ch := crc32.NewIEEE()
+	_, err := ch.Write([]byte(str))
+	if err != nil {
+		return "", err
+	}
+	sum := ch.Sum(nil)
+	return base32.HexEncoding.EncodeToString(sum), nil
 }

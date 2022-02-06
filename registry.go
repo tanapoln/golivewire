@@ -11,6 +11,7 @@ var (
 	ErrNotComponent   = errors.New("object must embeded golivewire.BaseComponent")
 	ErrNoNameDefined  = errors.New("component must have name defined, cannot be empty")
 	ErrNotRenderer    = errors.New("object must implement golivewire.Renderer")
+	ErrInvalidContext = errors.New("invalid context internal data, you may forgot to add context on template func")
 )
 
 type factoryRegistry map[string]factory
@@ -42,18 +43,18 @@ type factory struct {
 }
 
 func (f factory) createInstance(ctx context.Context) (baseComponentSupport, error) {
+	ctx = withQsStore(ctx)
 	comp := f.fn()
 
 	if req := httpRequestFromContext(ctx); req != nil {
-		binder := &defaultBinder{}
-		err := binder.BindQuery(req, comp)
+		err := bindQuery(req, comp)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	baseComp := comp.(baseComponentSupport)
-	baseComp.getBaseComponent().Name = f.name
+	baseComp.getBaseComponent().name = f.name
 	baseComp.getBaseComponent().ctx = ctx
 	return baseComp, nil
 }

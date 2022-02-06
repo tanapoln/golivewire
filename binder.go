@@ -4,9 +4,14 @@ import (
 	"encoding"
 	"errors"
 	"net/http"
+	"net/url"
 	"reflect"
 	"strconv"
 	"strings"
+
+	"github.com/gorilla/schema"
+	"github.com/hetiansu5/urlquery"
+	"github.com/pasztorpisti/qs"
 )
 
 type (
@@ -21,6 +26,53 @@ type (
 		UnmarshalParam(param string) error
 	}
 )
+
+var (
+	querystringEncoder *schema.Encoder
+	querystringDecoder *schema.Decoder
+
+	marshaler   *qs.QSMarshaler
+	unmarshaler *qs.QSUnmarshaler
+)
+
+func init() {
+	querystringEncoder = schema.NewEncoder()
+	querystringEncoder.SetAliasTag("query")
+
+	querystringDecoder = schema.NewDecoder()
+	querystringDecoder.IgnoreUnknownKeys(true)
+	querystringDecoder.SetAliasTag("query")
+	querystringDecoder.ZeroEmpty(true)
+
+	o1 := qs.NewDefaultMarshalOptions()
+	marshaler = qs.NewMarshaler(o1)
+
+	o2 := qs.NewDefaultUnmarshalOptions()
+	unmarshaler = qs.NewUnmarshaler(o2)
+}
+
+func bindQuery(c *http.Request, i interface{}) error {
+	// return urlquery.Unmarshal([]byte(c.URL.Query().Encode()), i)
+	// return unmarshaler.UnmarshalValues(i, c.URL.Query())
+	return querystringDecoder.Decode(i, c.URL.Query())
+}
+
+func unbindQuery(i interface{}) (url.Values, error) {
+	data, err := urlquery.Marshal(i)
+	if err != nil {
+		return nil, err
+	}
+	return url.ParseQuery(string(data))
+
+	// return marshaler.MarshalValues(i)
+
+	// q := url.Values{}
+	// err := querystringEncoder.Encode(i, q)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// return q, nil
+}
 
 // BindQuery binds query params to bindable object
 func (b *defaultBinder) BindQuery(c *http.Request, i interface{}) error {

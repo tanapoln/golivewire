@@ -1,7 +1,9 @@
 package golivewire
 
 import (
+	"errors"
 	"net/http"
+	"net/url"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/rs/cors"
@@ -13,8 +15,8 @@ var (
 
 func NewAjaxHandler() http.Handler {
 	router := httprouter.New()
-
-	router.POST("/livewire/message/:componentName", wrapHandlerFunc(func(w http.ResponseWriter, r *http.Request, params httprouter.Params) (interface{}, error) {
+	router.POST("/livewire/message/:componentName", ajaxMiddleware(wrapHandlerFunc(func(w http.ResponseWriter, r *http.Request, params httprouter.Params) (interface{}, error) {
+		w.Header().Set("cache-control", "max-age=0, must-revalidate, no-cache, no-store, private")
 		name := params.ByName("componentName")
 		compFactory, ok := componentRegistry[name]
 		if !ok {
@@ -46,17 +48,25 @@ func NewAjaxHandler() http.Handler {
 			return nil, err
 		}
 
+		path, err := renderMessageResponsePath(comp, &req.Fingerprint)
+		if err != nil {
+			return nil, err
+		}
+		htmlHash, _ := crc32Hash(html)
 		resp := messageResponse{
 			Effects: messageEffects{
 				Html:  html,
 				Dirty: []string{},
+				Path:  path.String(),
 			},
 			ServerMemo: serverMemo{
-				Data: comp,
+				Checksum: "",
+				Data:     comp,
+				HTMLHash: htmlHash,
 			},
 		}
 		return resp, nil
-	}))
+	})))
 
 	var hnd http.Handler = router
 	if CORSOptions != nil {
@@ -65,4 +75,54 @@ func NewAjaxHandler() http.Handler {
 	}
 
 	return hnd
+}
+
+func renderMessageResponsePath(comp baseComponentSupport, fingerprint *fingerprint) (*url.URL, error) {
+	httpReq := httpRequestFromContext(comp.getBaseComponent().getContext())
+	if httpReq == nil {
+		return nil, errors.New("invalid component context, expect http request to be exist")
+	}
+	oriURL := originalURL(httpReq)
+
+	u := url.URL{}
+	u.Scheme = oriURL.Scheme
+	u.Host = oriURL.Host
+
+	qs := qsStoreFromCtx(comp.getBaseComponent().getContext())
+	if qs == nil {
+		return nil, ErrInvalidContext
+	}
+	u.RawQuery = qs.Encode()
+
+	if fingerprint != nil {
+		parsed, err := url.Parse(fingerprint.Path)
+		if err != nil {
+			return nil, err
+		}
+		u.Path = parsed.Path
+
+	} else {
+		u.Path = oriURL.Path
+	}
+
+	return &u, nil
+}
+func originalURL(req *http.Request) *url.URL {
+	u := *req.URL
+	u.Host = req.Host
+
+	if req.TLS == nil {
+		u.Scheme = "http"
+	} else {
+		u.Scheme = "https"
+	}
+
+	if v := req.Header.Get("x-forwarded-host"); v != "" {
+		u.Host = v
+	}
+	if v := req.Header.Get("x-forwarded-proto"); v != "" {
+		u.Scheme = v
+	}
+
+	return &u
 }

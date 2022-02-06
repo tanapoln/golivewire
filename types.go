@@ -34,16 +34,20 @@ type fingerprint struct {
 }
 
 type serverMemo struct {
-	Data interface{} `json:"data"`
+	Checksum string      `json:"checksum,omitempty"`
+	Data     interface{} `json:"data"`
+	HTMLHash string      `json:"htmlHash,omitempty"`
 }
 
 type messageEffects struct {
 	Html  string   `json:"html"`
 	Dirty []string `json:"dirty"`
+	Path  string   `json:"path,omitempty"`
 }
 
 type componentEffects struct {
 	Listeners []string `json:"listeners,omitempty"`
+	Path      string   `json:"path,omitempty"`
 }
 
 type updateAction struct {
@@ -52,7 +56,13 @@ type updateAction struct {
 }
 
 type updateActionPayload struct {
-	ID     string        `json:"id"`
-	Method string        `json:"method"`
-	Params []interface{} `json:"params"`
+	ID string `json:"id"`
+
+	// For type callMethod
+	Method string        `json:"method,omitempty"`
+	Params []interface{} `json:"params,omitempty"`
+
+	// For type syncInput
+	Name  string      `json:"name,omitempty"`
+	Value interface{} `json:"value,omitempty"`
 }

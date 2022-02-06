@@ -8,9 +8,13 @@ import (
 
 type BaseComponent struct {
 	id        string
-	Name      string   `json:"-"`
-	Listeners []string `json:"-"`
+	name      string
+	Listeners []string `json:"-" query:"-"`
 	ctx       context.Context
+}
+
+func (b *BaseComponent) GetName() string {
+	return b.name
 }
 
 func (b *BaseComponent) GetID() string {
