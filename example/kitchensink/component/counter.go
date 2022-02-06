@@ -22,7 +22,7 @@ func init() {
 type Counter struct {
 	golivewire.BaseComponent
 
-	Count int `json:"count"`
+	Count int `json:"count" query:"count"`
 }
 
 func (c *Counter) Render(ctx context.Context) (string, error) {

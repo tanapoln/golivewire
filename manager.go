@@ -42,6 +42,21 @@ func (l *livewireManager) OriginalMethod() string {
 	return l.httpReq.Method
 }
 
+func (l *livewireManager) Queryparams() map[string]interface{} {
+	result := map[string]interface{}{}
+	for key, val := range l.httpReq.URL.Query() {
+		switch len(val) {
+		case 0:
+			result[key] = ""
+		case 1:
+			result[key] = val[0]
+		default:
+			result[key] = val
+		}
+	}
+	return result
+}
+
 func (l *livewireManager) NewComponentInstance(name string) (Component, error) {
 	compFactory, ok := componentRegistry[name]
 	if !ok {

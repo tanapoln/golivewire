@@ -77,6 +77,9 @@ func (l *lifecycleManager) bindDataToComponent() error {
 }
 
 func (l *lifecycleManager) InitialHydrate() error {
+	if err := l.component.getBaseComponent().bindQuery(); err != nil {
+		return err
+	}
 	return nil
 }
 
