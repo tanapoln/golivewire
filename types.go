@@ -14,6 +14,10 @@ type OnBoot interface {
 	Boot() error
 }
 
+type ComponentValidator interface {
+	Validate(ctx context.Context) error
+}
+
 type Querystringer interface {
 	Querystring() url.Values
 }

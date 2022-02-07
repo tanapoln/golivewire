@@ -56,8 +56,16 @@ func init() {
 			return nil
 		}))
 
-		manager.HookRegister(EventComponentHydrateSubsequent, LifecycleHookFunc(func(ctx context.Context, component Component, request *Request, response *Response) error {
-			return nil
+		manager.HookRegister(EventComponentBooted, LifecycleHookFunc(func(ctx context.Context, component Component, request *Request, response *Response) error {
+			if c, ok := component.(ComponentValidator); ok {
+				if err := c.Validate(ctx); err != nil {
+					return err
+				} else {
+					return nil
+				}
+			} else {
+				return nil
+			}
 		}))
 	})
 }

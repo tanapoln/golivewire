@@ -89,7 +89,19 @@ func (l *lifecycleManager) Hydrate() error {
 		return err
 	}
 
-	return l.manager.HookDispatch(EventComponentHydrate, l)
+	if err := l.manager.HookDispatch(EventComponentHydrate, l); err != nil {
+		return err
+	}
+
+	if err := l.manager.HookDispatch(EventComponentHydrateSubsequent, l); err != nil {
+		return err
+	}
+
+	if err := l.manager.HookDispatch(EventComponentBooted, l); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (l *lifecycleManager) bindDataToComponent() error {
@@ -110,6 +122,10 @@ func (l *lifecycleManager) bindDataToComponent() error {
 }
 
 func (l *lifecycleManager) InitialHydrate() error {
+	if err := l.manager.HookDispatch(EventComponentHydrate, l); err != nil {
+		return err
+	}
+
 	if err := l.manager.HookDispatch(EventComponentHydrateInitial, l); err != nil {
 		return err
 	}
@@ -200,7 +216,7 @@ func (l *lifecycleManager) ToInitialResponse() error {
 	if err := l.checkDeadlineError(); err != nil {
 		return err
 	}
-	
+
 	comp := l.component.getBaseComponent()
 	view := comp.preRenderView
 

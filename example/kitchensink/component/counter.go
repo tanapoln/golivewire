@@ -25,6 +25,13 @@ type Counter struct {
 	Count int `json:"count" query:"count"`
 }
 
+func (c *Counter) Validate(ctx context.Context) error {
+	if c.Count == 7 {
+		return golivewire.ErrBadRequest.Message("error 400")
+	}
+	return nil
+}
+
 func (c *Counter) Render(ctx context.Context) (string, error) {
 	time.Sleep(100 * time.Millisecond)
 	return RenderTemplate(c, `
