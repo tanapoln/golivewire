@@ -15,6 +15,7 @@ type BaseComponent struct {
 	preRenderView    *htmlView
 	shouldSkipRender bool
 	children         []Component
+	ErrorBag         ErrorBag
 }
 
 func (c *BaseComponent) ID() string {

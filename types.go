@@ -55,7 +55,6 @@ type serverMemo struct {
 	HtmlHash string           `json:"htmlHash,omitempty"`
 	Checksum string           `json:"checksum,omitempty"`
 	Children []childComponent `json:"children,omitempty"`
-	Errors   []interface{}    `json:"errors,omitempty"`
 	DataMeta dataMeta         `json:"dataMeta,omitempty"`
 }
 
@@ -106,4 +105,53 @@ type updateActionPayload struct {
 
 	// for fireEvent
 	Event string `json:"event"`
+}
+
+// ErrorBag hold error message. it is not threadsafe.
+type ErrorBag struct {
+	data map[string][]string
+}
+
+func (e *ErrorBag) AddError(key string, message string) {
+	if e.data == nil {
+		e.data = make(map[string][]string)
+	}
+	e.data[key] = append(e.data[key], message)
+}
+
+func (e *ErrorBag) Keys() []string {
+	if e.data == nil {
+		return []string{}
+	}
+
+	keys := make([]string, 0, len(e.data))
+	for k := range e.data {
+		keys = append(keys, k)
+	}
+	return keys
+}
+
+func (e *ErrorBag) Messages() map[string][]string {
+	if e.data == nil {
+		return map[string][]string{}
+	}
+
+	return e.data
+}
+
+func (e *ErrorBag) Get(key string) []string {
+	return e.Messages()[key]
+}
+
+func (e *ErrorBag) GetFirst(key string) string {
+	arr := e.Get(key)
+	if len(arr) > 0 {
+		return arr[0]
+	} else {
+		return ""
+	}
+}
+
+func (e *ErrorBag) Any() bool {
+	return len(e.data) > 0
 }
