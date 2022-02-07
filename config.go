@@ -9,6 +9,7 @@ import (
 var (
 	baseURL         string
 	DevelopmentMode bool
+	ChecksumKey     string
 )
 
 func SetBaseURL(raw string) {

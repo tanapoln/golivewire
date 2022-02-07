@@ -27,6 +27,7 @@ func main() {
 	golivewire.SetBaseURL("http://localhost:8081")
 	golivewire.EnableMethodCamelCaseSupport = true
 	golivewire.DevelopmentMode = true
+	golivewire.ChecksumKey = "secret_checksum"
 	golivewire.CORSOptions = &cors.Options{
 		AllowedOrigins: []string{"*"},
 		AllowedHeaders: []string{"*"},

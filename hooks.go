@@ -68,6 +68,31 @@ func init() {
 			}
 		}))
 	})
+
+	registerBooter(func(manager *livewireManager) {
+		manager.HookRegister(EventComponentHydrateSubsequent, LifecycleHookFunc(func(ctx context.Context, component Component, request *Request, response *Response) error {
+			checksum := request.ServerMemo.Checksum
+			request.ServerMemo.Checksum = ""
+
+			equal, err := defaultChecksum.Check(checksum, request.Fingerprint, request.ServerMemo)
+			if err != nil {
+				return err
+			}
+			if !equal {
+				return ErrBadRequest.Message("corrupt component, checksum mismatch")
+			}
+			return nil
+		}))
+
+		manager.HookRegister(EventComponentDehydrate, LifecycleHookFunc(func(ctx context.Context, component Component, request *Request, response *Response) error {
+			checksum, err := defaultChecksum.Generate(response.Fingerprint, response.ServerMemo)
+			if err != nil {
+				return err
+			}
+			response.ServerMemo.Checksum = checksum
+			return nil
+		}))
+	})
 }
 
 func hookQueryParamHydration(ctx context.Context, component Component, request *Request, response *Response) error {
