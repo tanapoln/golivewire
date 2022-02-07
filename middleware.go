@@ -25,3 +25,5 @@ func ajaxMiddleware(handle httprouter.Handle) httprouter.Handle {
 		handle(w, r, p)
 	}
 }
+
+type AjaxMiddlewareFunc func(original httprouter.Handle) httprouter.Handle
