@@ -2,6 +2,7 @@ package golivewire
 
 import (
 	"context"
+	"html/template"
 )
 
 type BaseComponent struct {
@@ -29,6 +30,10 @@ func (c *BaseComponent) WithListeners(listeners ...string) {
 
 func (c *BaseComponent) Context() context.Context {
 	return c.ctx
+}
+
+func (c *BaseComponent) RenderChild(componentName string, params H) (template.HTML, error) {
+	return LivewireTemplateFunc(c, componentName, params)
 }
 
 func (c *BaseComponent) getBaseComponent() *BaseComponent {

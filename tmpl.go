@@ -39,6 +39,9 @@ func LivewireTemplateFunc(args ...interface{}) (template.HTML, error) {
 	if ctx == nil {
 		return "", errors.New("no context or component on render")
 	}
+	if _, ok := ctx.Deadline(); !ok {
+		return "", ctx.Err()
+	}
 
 	manager := managerFromCtx(ctx)
 	if manager == nil {
