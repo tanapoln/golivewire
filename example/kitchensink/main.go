@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"html/template"
 	"path"
 	"runtime"
 	"strings"
@@ -27,6 +26,7 @@ func currentDir() string {
 func main() {
 	golivewire.SetBaseURL("http://localhost:8081")
 	golivewire.EnableMethodCamelCaseSupport = true
+	golivewire.DevelopmentMode = true
 	golivewire.CORSOptions = &cors.Options{
 		AllowedOrigins: []string{"*"},
 		AllowedHeaders: []string{"*"},
@@ -35,9 +35,7 @@ func main() {
 	srv := gin.Default()
 
 	srv.Static("/static", path.Join(currentDir(), "public", "static"))
-	srv.SetFuncMap(template.FuncMap{
-		"livewire": golivewire.LivewireTemplateFunc,
-	})
+	srv.SetFuncMap(golivewire.TemplateFuncMap())
 	srv.LoadHTMLGlob(path.Join(currentDir(), "templates", "**"))
 
 	srv.Use(func(c *gin.Context) {

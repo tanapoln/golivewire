@@ -6,7 +6,10 @@ import (
 	"strings"
 )
 
-var baseURL string
+var (
+	baseURL         string
+	DevelopmentMode bool
+)
 
 func SetBaseURL(raw string) {
 	u, err := url.Parse(raw)

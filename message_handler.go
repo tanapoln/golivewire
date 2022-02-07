@@ -7,8 +7,7 @@ import (
 
 var (
 	EnableMethodCamelCaseSupport = false
-
-	errorInterface = reflect.TypeOf((*error)(nil)).Elem()
+	errorInterface               = reflect.TypeOf((*error)(nil)).Elem()
 )
 
 type messageHandler struct {

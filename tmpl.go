@@ -1,6 +1,11 @@
 package golivewire
 
 import (
+	"bytes"
+	_ "embed"
+)
+
+import (
 	"context"
 	"errors"
 	"html/template"
@@ -78,4 +83,36 @@ func LivewireTemplateFunc(args ...interface{}) (template.HTML, error) {
 	}
 
 	return lifecycle.response.Effects.Html, nil
+}
+
+//go:embed static/livewire.init.js.tmpl
+var jsInitRaw string
+
+var (
+	livewireInitTemplate *template.Template
+)
+
+func init() {
+	livewireInitTemplate = template.Must(template.New("livewire.init").Parse(jsInitRaw))
+}
+
+func LivewireJS(csrfToken string) (template.HTML, error) {
+	buf := &bytes.Buffer{}
+	err := livewireInitTemplate.Execute(buf, H{
+		"Token":       csrfToken,
+		"BaseURL":     baseURL,
+		"Development": DevelopmentMode,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return template.HTML(buf.String()), nil
+}
+
+func TemplateFuncMap() template.FuncMap {
+	return template.FuncMap{
+		"livewire":   LivewireTemplateFunc,
+		"livewireJS": LivewireJS,
+	}
 }

@@ -1,0 +1,20 @@
+<script>
+  (function () {
+    if (window.livewire) {
+      console.warn('Livewire: It looks like Livewire\'s @livewireScripts JavaScript assets have already been loaded. Make sure you aren\'t loading them twice.');
+    }
+
+    window.livewire = new Livewire();
+    {{if .Development}}window.livewire.devTools(true);{{end}}
+    window.Livewire = window.livewire;
+    window.livewire_app_url = '{{.BaseURL}}';
+    window.livewire_token = '{{.Token}}';
+    let s = false;
+    document.addEventListener("DOMContentLoaded", function () {
+      if (!s) {
+        window.livewire.start();
+        s = true;
+      }
+    });
+  })()
+</script>
