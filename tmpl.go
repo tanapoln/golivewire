@@ -30,7 +30,9 @@ func LivewireTemplateFunc(args ...interface{}) (template.HTML, error) {
 		}
 		if v, ok := arg.(Component); ok {
 			parentComponent = v
-			ctx = v.getBaseComponent().ctx
+			if ctx == nil { // prefer ctx from args, do not overwrite
+				ctx = v.getBaseComponent().ctx
+			}
 		}
 		if v, ok := arg.(map[string]interface{}); ok {
 			componentParams = v

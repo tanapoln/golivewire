@@ -3,6 +3,7 @@ package golivewire
 import (
 	"context"
 	"html/template"
+	"net/http"
 )
 
 type BaseComponent struct {
@@ -32,8 +33,12 @@ func (c *BaseComponent) Context() context.Context {
 	return c.ctx
 }
 
-func (c *BaseComponent) RenderChild(componentName string, params H) (template.HTML, error) {
-	return LivewireTemplateFunc(c, componentName, params)
+func (c *BaseComponent) RenderChild(ctx context.Context, componentName string, params H) (template.HTML, error) {
+	return LivewireTemplateFunc(ctx, c, componentName, params)
+}
+
+func (c *BaseComponent) HTTPRequest() *http.Request {
+	return managerFromCtx(c.ctx).httpReq
 }
 
 func (c *BaseComponent) getBaseComponent() *BaseComponent {
