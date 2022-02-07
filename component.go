@@ -15,7 +15,7 @@ type BaseComponent struct {
 	preRenderView    *htmlView
 	shouldSkipRender bool
 	children         []Component
-	ErrorBag         ErrorBag
+	errorBag         ErrorBag
 }
 
 func (c *BaseComponent) ID() string {
@@ -40,6 +40,10 @@ func (c *BaseComponent) RenderChild(ctx context.Context, componentName string, p
 
 func (c *BaseComponent) HTTPRequest() *http.Request {
 	return managerFromCtx(c.ctx).httpReq
+}
+
+func (c *BaseComponent) ErrorBag() *ErrorBag {
+	return &c.errorBag
 }
 
 func (c *BaseComponent) getBaseComponent() *BaseComponent {
