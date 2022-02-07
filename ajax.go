@@ -26,6 +26,9 @@ func NewAjaxHandler() http.Handler {
 		if err != nil {
 			return nil, err
 		}
+		if err := lifecycle.Boot(); err != nil {
+			return nil, err
+		}
 		if err := lifecycle.Hydrate(); err != nil {
 			return nil, err
 		}

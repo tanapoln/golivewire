@@ -53,6 +53,9 @@ func LivewireTemplateFunc(args ...interface{}) (template.HTML, error) {
 		parentComponent.getBaseComponent().addChild(lifecycle.component)
 	}
 
+	if err := lifecycle.Boot(); err != nil {
+		return "", err
+	}
 	if err := lifecycle.InitialHydrate(); err != nil {
 		return "", err
 	}

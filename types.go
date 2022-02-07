@@ -38,7 +38,7 @@ type Request struct {
 
 type Response struct {
 	Fingerprint fingerprint `json:"fingerprint,omitempty"`
-	Effects     Effects     `json:"effects,omitempty"`
+	Effects     effects     `json:"effects,omitempty"`
 	ServerMemo  serverMemo  `json:"serverMemo,omitempty"`
 }
 
@@ -71,7 +71,7 @@ type dataMeta struct {
 	Stringables []interface{}     `json:"stringables,omitempty"`
 }
 
-type Effects struct {
+type effects struct {
 	Html       template.HTML          `json:"html"`
 	Dirty      []string               `json:"dirty"`
 	HtmlHash   string                 `json:"htmlHash,omitempty"`

@@ -73,7 +73,7 @@ func (l *livewireManager) OriginalMethod() string {
 }
 
 func (l *livewireManager) OriginalBaseURL() string {
-	return "http://localhost:8081"
+	return baseURL
 }
 
 func (l *livewireManager) Queryparams() map[string]interface{} {

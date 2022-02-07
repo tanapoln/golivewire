@@ -25,6 +25,7 @@ func currentDir() string {
 }
 
 func main() {
+	golivewire.SetBaseURL("http://localhost:8081")
 	golivewire.EnableMethodCamelCaseSupport = true
 	golivewire.CORSOptions = &cors.Options{
 		AllowedOrigins: []string{"*"},
