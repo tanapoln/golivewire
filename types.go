@@ -59,7 +59,7 @@ type serverMemo struct {
 	HtmlHash string           `json:"htmlHash,omitempty"`
 	Checksum string           `json:"checksum,omitempty"`
 	Children []childComponent `json:"children,omitempty"`
-	DataMeta dataMeta         `json:"dataMeta,omitempty"`
+	DataMeta *dataMeta        `json:"dataMeta,omitempty"`
 }
 
 type childComponent struct {
