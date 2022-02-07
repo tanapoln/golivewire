@@ -54,6 +54,12 @@ func main() {
 			defer func() {
 				if err := recover(); err != nil {
 					fmt.Printf("Recover: %s\n", err)
+					if httErr, ok := err.(golivewire.HTTPError); ok {
+						c.String(httErr.HTTPStatusCode(), httErr.Error())
+					} else {
+						c.String(500, fmt.Sprintf("%v", err))
+					}
+					cancelFunc()
 				}
 			}()
 
@@ -65,7 +71,10 @@ func main() {
 		case <-done:
 			return
 		case <-ctx.Done():
-			c.String(503, "Server timeout exceeded")
+			switch ctx.Err() {
+			case context.DeadlineExceeded:
+				c.String(503, "Server timeout exceeded")
+			}
 		}
 	})
 
